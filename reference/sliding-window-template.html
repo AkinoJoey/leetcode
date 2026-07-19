@@ -1,0 +1,139 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference — Sliding Window テンプレート</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+
+<p class="eyebrow">Reference · 引くための資料</p>
+<h1>Sliding Window テンプレート</h1>
+<p class="subtitle">連続する部分配列・部分文字列を扱う型。暗記ではなく、引いて使うために。</p>
+
+<h2>1. 見分ける</h2>
+
+<table>
+  <thead>
+    <tr><th>問題文の合図</th><th>選ぶ型</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>「連続する（contiguous / substring / subarray）」＋最長・最短・個数</td><td>Sliding Window</td></tr>
+    <tr><td>「ソート済み配列」から条件を満たす<em>ペア</em></td><td>Two Pointers（両端から）</td></tr>
+    <tr><td>順序が無関係。存在・個数・グループ化</td><td>Hash（<a href="./python-hash-cheatsheet.html">→ チートシート</a>）</td></tr>
+    <tr><td>連続でない部分集合を選ぶ</td><td>DP / backtracking</td></tr>
+  </tbody>
+</table>
+
+<p><strong>決定打は「連続」の二文字。</strong>部分列が飛び飛びでよいなら window は使えない。
+窓は縮めた瞬間に、捨てた要素を二度と拾わないため。</p>
+
+<h2>2. 可変長ウィンドウ（最長を求める）</h2>
+
+<p>もっとも頻出。「条件を満たす限り伸ばし、破れたら縮める」。</p>
+
+<pre><code>def longest(s):
+    state = {}                  # 窓の中身を表す状態
+    left = 0
+    best = 0
+
+    for right, ch in enumerate(s):
+        # 1) 右端を窓に入れる
+        add(state, ch)
+
+        # 2) 条件が破れている間、左を縮める
+        while is_invalid(state):
+            remove(state, s[left])
+            left += 1
+
+        # 3) ここで窓は必ず valid。答えを更新
+        best = max(best, right - left + 1)
+
+    return best</code></pre>
+
+<div class="aside">
+  <span class="label">不変条件</span>
+  <p><code>while</code> を抜けた時点で<strong>窓は常に valid</strong>。この一行を口に出せると、
+  なぜ最後に <code>max</code> を取ってよいかが説明できる。窓の長さは <code>right - left + 1</code>（+1 を落とすのが定番のバグ）。</p>
+</div>
+
+<h3>最短を求める場合</h3>
+
+<p>不等号の向きが逆になる。「valid になるまで伸ばし、valid な<em>間</em>縮めながら答えを更新」。</p>
+
+<pre><code>while is_valid(state):
+    best = min(best, right - left + 1)   # 縮める前に更新
+    remove(state, s[left])
+    left += 1</code></pre>
+
+<h2>3. 固定長ウィンドウ（長さ k）</h2>
+
+<pre><code>total = sum(nums[:k])
+best = total
+for right in range(k, len(nums)):
+    total += nums[right] - nums[right - k]   # 入れて、出す
+    best = max(best, total)</code></pre>
+
+<h2>4. 状態の持ち方（用途別）</h2>
+
+<table>
+  <thead>
+    <tr><th>窓の中で知りたいこと</th><th>状態</th><th>代表問題</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>重複しているか</td><td><code>set</code></td><td>Longest Substring Without Repeating</td></tr>
+    <tr><td>各文字が何個か</td><td><code>collections.Counter</code> / <code>defaultdict(int)</code></td><td>Character Replacement</td></tr>
+    <tr><td>不足している文字数</td><td><code>Counter</code> ＋ 残数カウンタ</td><td>Minimum Window Substring</td></tr>
+    <tr><td>窓内の最大値</td><td><code>collections.deque</code>（単調減少）</td><td>Sliding Window Maximum</td></tr>
+  </tbody>
+</table>
+
+<h2>5. 計算量</h2>
+
+<p><strong>O(n)</strong>。二重ループに見えるが、<code>left</code> は減ることがなく、各要素は高々1回入って1回出るだけ
+（償却解析）。面接ではこの一文をそのまま言う——<em>「内側の while は全体で n 回しか回りません」</em>。
+空間は状態の大きさ、文字種が定数なら O(1)。</p>
+
+<h2>6. 境界の検算（オフバイワン対策）</h2>
+
+<div class="aside">
+  <p><strong>境界は推論で確かめない。小さい具体値を代入する。</strong>
+  「range は終端を含まないから +1 が要るはず」という頭の中の推論は外れる。5秒で代入したほうが速く、確実。</p>
+</div>
+
+<table>
+  <thead><tr><th>書いた式</th><th>代入して確かめる</th><th>判定</th></tr></thead>
+  <tbody>
+    <tr><td><code>range(k)</code> で初期窓</td><td>k=2 → 0,1 → 2個</td><td>✓</td></tr>
+    <tr><td><code>range(k+1)</code> で初期窓</td><td>k=2 → 0,1,2 → 3個</td><td>✗</td></tr>
+    <tr><td><code>right - left + 1</code></td><td>left=right=3 → 1</td><td>✓ 長さ1</td></tr>
+    <tr><td><code>range(len(a)-1, -1, -1)</code></td><td>len=3 → 2,1,0</td><td>✓ 逆順で0に到達</td></tr>
+    <tr><td><code>range(len(a), 0, -1)</code></td><td>len=3 → 3,2,1</td><td>✗ 添字3で落ち、0を飛ばす</td></tr>
+  </tbody>
+</table>
+
+<p>固定長窓の対応関係（k=2, nums=[1,2,3] で常に確認できる）:</p>
+<pre><code>初期窓  nums[0 .. k-1]        → range(k)
+最初のスライドで入る右端      → right = k
+出ていく左端                  → nums[right - k]
+ループ                        → range(k, len(nums))</code></pre>
+
+<h2>7. Python の地雷</h2>
+
+<ul>
+  <li><code>del counter[c]</code> を忘れると、値0のキーが残って <code>len(counter)</code> が狂う。
+      「種類数」を条件に使うなら、0になったキーは消すこと。</li>
+  <li><code>defaultdict(int)</code> は<strong>参照しただけでキーが生える</strong>。
+      <code>if d[c] == 0</code> と書いた瞬間 <code>c</code> が辞書に増える。判定は <code>d.get(c, 0)</code> か <code>c in d</code>。</li>
+  <li>窓の長さは <code>right - left + 1</code>。off-by-one の定番。</li>
+  <li><strong><code>best = max(best, ...)</code> の代入を落とさない。</strong><code>max(...)</code> は値を返すだけで、
+      受け取らなければ何も起きない。エラーも出ないので発見が遅れる。</li>
+  <li>逆順走査は <code>range(len(a) - 1, -1, -1)</code>。<code>range(len(a), 0, -1)</code> は
+      初回で <code>IndexError</code>、かつ添字0に到達しない。</li>
+  <li><strong><code>left</code> をループのたびに 0 に戻さない。</strong>戻した時点で O(n²) になり、
+      window ではなく総当たりになる。<code>left</code> の単調性がこの型の全てである。</li>
+  <li>負の数を含む配列では「和が k 以上の最短区間」に window は使えない（縮めても和が増えうる）。
+      window の前提は<strong>単調性</strong>。</li>
+</ul>
+
+<div class="footer">
+  <p>関連：<a href="../lessons/0002-sliding-window.html">Lesson 02</a> ·
+     <a href="./python-hash-cheatsheet.html">Python ハッシュ構造チートシート</a> ·
+     <a href="../MISSION.md">Mission</a></p>
+</div>

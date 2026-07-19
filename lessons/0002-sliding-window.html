@@ -1,0 +1,168 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 02 — 窓を伸ばして、縮める</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+
+<p class="eyebrow">Lesson 02 · 所要 15分</p>
+<h1>窓を伸ばして、縮める</h1>
+<p class="subtitle">「連続」の二文字が見えたら、この型を疑う。</p>
+
+<p>前回、<a href="./0001-hash-map-collapse.html">内側ループが探索なら辞書で潰せる</a>という型を手に入れました。
+今日はその型が<strong>効かない</strong>場所を一つ確定させます。</p>
+
+<p>辞書は「どこにあるか」を答えますが、<strong>順序を捨てます</strong>。
+だから問題文に「連続する部分文字列」「連続する部分配列」と書かれた瞬間、辞書だけでは足りません。
+連続を保ったまま O(n) に落とす型が sliding window です。</p>
+
+<h2>先に思い出す</h2>
+
+<p>本文を読む前に、前回の一問。外して構いません。</p>
+
+<div class="quiz">
+  <p class="quiz-q">Group Anagrams のキーに、<code>sorted(word)</code> ではなく文字数のカウントを使う利点は？（語長 k）</p>
+  <button class="quiz-opt" data-correct>O(k log k) が O(k) になる</button>
+  <button class="quiz-opt">O(k) が O(log k) になる</button>
+  <button class="quiz-opt">追加メモリが不要になる</button>
+  <button class="quiz-opt">大文字小文字を区別できる</button>
+  <p class="quiz-fb">ソートは1語あたり O(k log k)、カウントは O(k)。全体では O(nk log k) → O(nk)。
+  面接では<strong>両方を挙げてから選ぶ</strong>のが強い——「ソートキーが素直ですが、
+  カウントキーなら log が落ちます。語が長いならこちらです」。あなたが自力で到達したのは後者です。</p>
+</div>
+
+<h2>知識：窓には二つの動きしかない</h2>
+
+<p>sliding window は、配列の上に区間 <code>[left, right]</code> を置き、右端を1つずつ進めるだけの走査です。
+やることは二つだけ。</p>
+
+<ol>
+  <li><strong>伸ばす</strong>：<code>right</code> を進めて、新しい要素を窓の状態に足す。</li>
+  <li><strong>縮める</strong>：条件が破れたら、破れなくなるまで <code>left</code> を進めて要素を捨てる。</li>
+</ol>
+
+<p>「重複のない最長の部分文字列」を例にすると、そのまま以下になります。</p>
+
+<pre><code>def length_of_longest_substring(s):
+    window = set()          # 窓の中にある文字
+    left = 0
+    best = 0
+
+    for right, ch in enumerate(s):
+        while ch in window:            # 条件が破れている間だけ縮める
+            window.remove(s[left])
+            left += 1
+        window.add(ch)                 # ここで初めて安全に入れられる
+        best = max(best, right - left + 1)
+
+    return best</code></pre>
+
+<div class="aside">
+  <span class="label">口に出すべき一文</span>
+  <p><em>「<code>while</code> を抜けた時点で、窓は必ず条件を満たしています」</em>——これが不変条件です。
+  だから毎ステップ <code>max</code> を取ってよい。面接では、コードより先にこの一文を言うと、
+  以降の説明が全部この上に乗ります。</p>
+</div>
+
+<h3>なぜ二重ループなのに O(n) なのか</h3>
+
+<p>面接で必ず聞かれます。答えは償却解析です。</p>
+
+<blockquote>
+  <code>left</code> は決して戻りません。各要素は高々1回窓に入り、高々1回出ていく。
+  だから内側の <code>while</code> は、全体を通して合計 n 回しか回りません。
+</blockquote>
+
+<p>「見た目は O(n²) ですが、<code>left</code> が単調に増えるので全体で O(n) です」。この言い方を覚えてください。</p>
+
+<h3>どこで使えないか</h3>
+
+<p>窓は縮めたら戻れません。つまり<strong>捨てた要素は二度と拾わない</strong>。
+これが成り立つのは、窓を縮めると条件が改善する方向に<em>単調</em>なときだけです。
+負の数を含む配列で「和が k 以上の最短区間」は、縮めると和が増えることがあるので window では解けません。</p>
+
+<p>型の使い分けと、状態の持ち方の一覧は
+<a href="../reference/sliding-window-template.html">Sliding Window テンプレート</a> にまとめました。</p>
+
+<h2>技能：思い出す</h2>
+
+<div class="quiz">
+  <p class="quiz-q">問題文のどの言葉が、sliding window を最も強く示唆するか？</p>
+  <button class="quiz-opt" data-correct>連続する部分配列の最長</button>
+  <button class="quiz-opt">ソート済み配列の中の2数</button>
+  <button class="quiz-opt">重複する要素の存在判定</button>
+  <button class="quiz-opt">木構造の最も深い経路</button>
+  <p class="quiz-fb">決定打は「連続」。飛び飛びで選んでよいなら窓は使えません（→ DP や backtracking）。
+  ソート済み配列のペアは two pointers、存在判定だけなら <a href="./0001-hash-map-collapse.html">前回のハッシュ</a>です。</p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">「最長」を求める型で、<code>best</code> を更新すべき位置はどこか？</p>
+  <button class="quiz-opt" data-correct>while を抜けた直後に更新</button>
+  <button class="quiz-opt">while に入る直前に更新</button>
+  <button class="quiz-opt">left を進めるたびに更新</button>
+  <button class="quiz-opt">ループを抜けた後に更新</button>
+  <p class="quiz-fb">窓が valid であることが保証されているのは <code>while</code> を抜けた後だけ。
+  なお「最短」を求める型では逆で、valid な<em>間</em>に縮めながら更新します。向きが反転する点に注意。</p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">窓の長さを表す式として正しいのは？</p>
+  <button class="quiz-opt" data-correct>right - left + 1</button>
+  <button class="quiz-opt">right - left - 1</button>
+  <button class="quiz-opt">right + left - 1</button>
+  <button class="quiz-opt">right + left + 1</button>
+  <p class="quiz-fb"><code>[left, right]</code> は両端を含む閉区間なので +1。
+  <code>left == right</code> のとき長さ1になるか、で毎回確かめられます。off-by-one はこの型の最頻出バグです。</p>
+</div>
+
+<h2>実践：今日やること</h2>
+
+<p>各問 20〜30分で詰まったら解答へ。上のコードを<strong>見ずに</strong>書くこと。</p>
+
+<ol>
+  <li><a href="https://leetcode.com/problems/maximum-average-subarray-i/">Maximum Average Subarray I</a>（Easy）— 助走。
+      長さ固定の窓。「右を入れて、左を出す」という窓の運動そのものだけを、条件判定なしで手に馴染ませます。</li>
+  <li><a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/">Longest Substring Without Repeating Characters</a>（<strong>Medium</strong>）— 本命。
+      書き始める前に「窓の状態として何を持つか」を一文で言うこと。</li>
+  <li><a href="https://leetcode.com/problems/longest-repeating-character-replacement/">Longest Repeating Character Replacement</a>（<strong>Medium</strong>・余力があれば）—
+      状態が <code>set</code> では足りなくなる問題。<code>Counter</code> が要ります。</li>
+</ol>
+
+<div class="aside">
+  <span class="label">窓に見えて窓ではない例</span>
+  <p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/">Best Time to Buy and Sell Stock</a> は
+  window の問題として紹介されがちですが、厳密には違います。<strong>窓が invalid になる条件が存在しない</strong>ため、
+  縮めるべき瞬間が来ない＝<code>while</code> に書くことが無い。正しい型は「これまでの最小値を持って1回走査する」です。
+  <code>left</code> が単調に前進するという<em>発想だけ</em>が共通しています。
+  テンプレートが当てはまらないと感じたら、それは型の選択が違うという正しい信号です。</p>
+</div>
+
+<div class="aside">
+  <span class="label">詰まったら</span>
+  <p>3問目で止まったら、答えを見る前にこの問いだけ——
+  <em>「窓が valid だと言えるのは、どんな不等式が成り立つときか？」</em>
+  （ヒント：窓の長さと、窓内で最多の文字の個数を比べる）</p>
+</div>
+
+<h2>今日の一次情報</h2>
+
+<p>見るべきもの（1本だけ）：
+<a href="https://neetcode.io/practice?tab=neetcode150">NeetCode 150</a> の Sliding Window セクション。
+2問目を<strong>自力で解いた後に</strong>解説動画を見て、自分の説明と比べてください。
+コードの一致より、<em>説明の順序</em>がどう違うかを見ること——それが面接で採点される部分です。</p>
+
+<p>パターン別に横に並べて練習したくなったら
+<a href="https://seanprashad.com/leetcode-patterns/">Sean Prashad — LeetCode Patterns</a> で
+"Sliding Window" を絞り込めます。</p>
+
+<div class="footer">
+  <p><strong>分からないところは、そのまま私に聞いてください。</strong>
+  「なぜ縮めるのが while で if ではないのか」「3問目の不変条件が腑に落ちない」——粒度は問いません。
+  質問はそのまま次のレッスン設計に反映されます。</p>
+  <p>次回予告：two pointers（両端から寄せる型）。sliding window と兄弟だが、動きが違う。</p>
+  <p><a href="../MISSION.md">Mission</a> ·
+     <a href="../reference/glossary.html">用語集</a> ·
+     <a href="../reference/sliding-window-template.html">Sliding Window テンプレート</a> ·
+     <a href="./0001-hash-map-collapse.html">Lesson 01</a></p>
+</div>
+
+<script src="../assets/quiz.js"></script>

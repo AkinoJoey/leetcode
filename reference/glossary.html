@@ -1,0 +1,106 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference — 用語集</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+
+<p class="eyebrow">Reference · 全レッスン共通</p>
+<h1>用語集</h1>
+<p class="subtitle">レッスンで使う言葉の定義。ここにある語は、以降のレッスンで説明なしに使います。</p>
+
+<div class="aside">
+  <p>知らない語が出てきたら、遠慮なく聞いてください。<strong>用語で詰まるのは、あなたの理解不足ではなく私の説明不足です。</strong>
+  聞かれた語はここに追加していきます。</p>
+</div>
+
+<h2>計算量まわり</h2>
+
+<h3>計算量 / O 記法</h3>
+<p>入力の大きさ <code>n</code> が増えたとき、処理時間が<strong>どういう伸び方をするか</strong>を表す記号。
+定数倍と細かい項は捨てて、伸び方の形だけを見る。<code>O(n²)</code> は「n が10倍になると時間は100倍」、
+<code>O(n)</code> は「10倍」、<code>O(log n)</code> は「ほとんど増えない」。</p>
+
+<table>
+  <thead><tr><th>記法</th><th>意味</th><th>典型</th></tr></thead>
+  <tbody>
+    <tr><td><code>O(1)</code></td><td>入力によらず一定</td><td>辞書の参照</td></tr>
+    <tr><td><code>O(log n)</code></td><td>半分ずつ絞る</td><td>二分探索</td></tr>
+    <tr><td><code>O(n)</code></td><td>1回なめる</td><td>sliding window</td></tr>
+    <tr><td><code>O(n log n)</code></td><td>ソートを含む</td><td><code>sorted()</code></td></tr>
+    <tr><td><code>O(n²)</code></td><td>総当たり（二重ループ）</td><td>素朴な Two Sum</td></tr>
+  </tbody>
+</table>
+
+<h3>単調（monotonic）</h3>
+<p><strong>一方向にしか動かず、逆戻りしないこと。</strong>
+値が減る一方なら「単調減少」、増える一方なら「単調増加」（途中で止まるのは含む）。</p>
+<p>重要なのは、単調だと分かった瞬間に<strong>動く回数に上限が付く</strong>こと。
+<code>left</code> が 0〜n を戻らずに進むなら、動く回数は多くても n 回。これが償却論法の前提になる。</p>
+<p>例：株価問題の <code>min_price</code>（7 → 1 → 1 → 1、下がるか同じ）、
+sliding window の <code>left</code>（進むか止まるか、戻らない）。</p>
+
+<h3>償却論法（amortized analysis）</h3>
+<p><strong>「最悪の1回」を回数分だけ掛けるのではなく、「全体の合計」で数える計算量の数え方。</strong></p>
+<p>二重ループに見えても、内側が回れる<em>総回数</em>に上限があるなら、掛け算ではなく足し算になる。</p>
+<pre><code>for right in ...:      # n 回
+    while ...:         # ここは全体で合計 n 回しか回らない
+        left += 1      # left は単調 → 0〜n しか動けない</code></pre>
+<p>素朴に <code>n × n = O(n²)</code> と数えるのは<strong>数えすぎ</strong>。
+重い反復は起こりうるが、それが n 回連続では起こりえないため。合計 <code>n + n = O(n)</code> が正しい。</p>
+<p>日常の例：年12回の家賃を「最も高くつく日 × 365日」と数えないのと同じ。実際に発生する合計を見る。</p>
+
+<h3>面接での言い方</h3>
+<blockquote>二重ループに見えますが、<code>left</code> は戻らないので内側は全体で n 回しか回りません。よって O(n) です。</blockquote>
+
+<h2>データ構造まわり</h2>
+
+<h3>ハッシュ可能（hashable）</h3>
+<p><strong>辞書のキーや集合の要素にできる</strong>という性質。中身が変わらないもの（イミュータブル）だけが該当する。</p>
+<p>可：<code>int</code> <code>str</code> <code>tuple</code> <code>frozenset</code> ／
+不可：<code>list</code> <code>dict</code> <code>set</code> <code>Counter</code></p>
+<p>詰まったら <code>tuple()</code> や <code>frozenset()</code> に変換する。
+詳細は <a href="./python-hash-cheatsheet.html">Python ハッシュ構造チートシート</a>。</p>
+
+<h3>不変条件（invariant）</h3>
+<p><strong>コードの特定の地点で、必ず成り立っていると言い切れる条件。</strong></p>
+<p>例：sliding window で <code>while</code> を抜けた直後、窓は必ず valid。
+だからそこで答えを更新してよい。<em>不変条件を口に出せると、コードの正しさをコードなしで説明できる。</em></p>
+
+<h2>問題文の語</h2>
+
+<table>
+  <thead><tr><th>語</th><th>意味</th><th>示唆する型</th></tr></thead>
+  <tbody>
+    <tr><td>subarray / 部分配列</td><td><strong>連続した</strong>要素の並び</td><td>sliding window</td></tr>
+    <tr><td>substring / 部分文字列</td><td><strong>連続した</strong>文字の並び</td><td>sliding window</td></tr>
+    <tr><td>subsequence / 部分列</td><td>順序は保つが<strong>飛び飛びでよい</strong></td><td>DP</td></tr>
+    <tr><td>subset / 部分集合</td><td>順序も連続も問わない</td><td>backtracking</td></tr>
+    <tr><td>in-place</td><td>追加メモリ O(1) で書き換えよ</td><td>two pointers</td></tr>
+  </tbody>
+</table>
+
+<div class="aside">
+  <span class="label">よく効く見分け</span>
+  <p><strong>subarray と subsequence の違いは頻出の罠。</strong>「連続」なら窓、「飛び飛び可」なら窓は使えない
+  （窓は縮めた時点で捨てた要素を二度と拾えないため）。</p>
+</div>
+
+<h2>型の名前</h2>
+
+<h3>sliding window（尺取り法）</h3>
+<p>配列上の連続区間 <code>[left, right]</code> を、右端を伸ばし・左端を縮めながら1回だけ走査する型。
+<a href="./sliding-window-template.html">→ テンプレート</a></p>
+
+<h3>two pointers</h3>
+<p>2つの添字を配列の<strong>両端から中央へ</strong>寄せる型。ソート済み配列のペア探索が典型。
+sliding window と兄弟だが、両端から寄る点が違う。</p>
+
+<h3>total order の話ではない語の注意</h3>
+<p>「最適解」＝計算量が理論下限に達した解。「素朴解 / brute force」＝思いつく総当たり。
+面接では<strong>素朴解を先に口に出してから</strong>最適化するのが定石（黙って最適解を書くより高く評価される）。</p>
+
+<div class="footer">
+  <p><a href="../MISSION.md">Mission</a> ·
+     <a href="./sliding-window-template.html">Sliding Window テンプレート</a> ·
+     <a href="./python-hash-cheatsheet.html">Python ハッシュ構造チートシート</a> ·
+     <a href="../lessons/0002-sliding-window.html">Lesson 02</a></p>
+</div>
