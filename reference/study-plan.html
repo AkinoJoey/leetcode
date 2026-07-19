@@ -1,0 +1,91 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference — 10週間の学習計画</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+
+<p class="eyebrow">Reference · 2026-07-19 → 09-30</p>
+<h1>10週間の学習計画</h1>
+<p class="subtitle">週10時間 × 10週 ＝ 約100時間。面接は10月以降。</p>
+
+<h2>前提となる判断</h2>
+
+<p>100時間で <a href="https://neetcode.io/practice?tab=neetcode150">NeetCode 150</a> を完走するのは現実的ではありません。
+1問あたり解答＋復習で平均40〜50分かかるため、100時間はおよそ<strong>120問ぶん</strong>。復習と模擬面接の時間を引くと
+実質<strong>90〜100問</strong>です。</p>
+
+<p>したがって方針は<strong>網羅ではなく被覆</strong>——
+<a href="https://www.techinterviewhandbook.org/grind75/">Grind 75</a> / Blind 75 相当のコアを確実に取り、
+余力のあるパターンだけ2問目・3問目に広げます。<strong>全パターンに一度は触れる</strong>ことを、
+一部のパターンを深掘りすることより優先してください。取りこぼしたパターンが面接で出ると0点ですが、
+浅くても触れていれば戦えます。</p>
+
+<div class="aside">
+  <span class="label">週の型</span>
+  <p><strong>平日（1h）</strong>＝ レッスンで新パターンを入れる ＋ その場で1問。<br>
+  <strong>週末（2〜3h）</strong>＝ 復習（前週の問題を<em>解き直す</em>、読み返さない）＋ 新規2〜3問。
+  週末は複数パターンを混ぜること（interleaving）。混ぜたほうが定着します。</p>
+</div>
+
+<h2>スケジュール</h2>
+
+<table>
+  <thead><tr><th>週</th><th>期間</th><th>トピック</th><th>目安</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>7/20 – 7/26</td><td>Arrays &amp; Hashing<span style="color:var(--muted)">（Lesson 01 済）</span> → Two Pointers</td><td>8問</td></tr>
+    <tr><td>2</td><td>7/27 – 8/02</td><td>Sliding Window → Stack</td><td>9問</td></tr>
+    <tr><td>3</td><td>8/03 – 8/09</td><td>Binary Search → Linked List</td><td>10問</td></tr>
+    <tr><td>4</td><td>8/10 – 8/16</td><td>Trees（DFS / BFS の型）</td><td>9問</td></tr>
+    <tr><td>5</td><td>8/17 – 8/23</td><td>Trees 続き → Heap / Priority Queue</td><td>9問</td></tr>
+    <tr><td>6</td><td>8/24 – 8/30</td><td>Backtracking ＋ <strong>初回の模擬面接</strong></td><td>8問</td></tr>
+    <tr><td>7</td><td>8/31 – 9/06</td><td>Graphs（BFS / DFS / Union-Find の触り）</td><td>9問</td></tr>
+    <tr><td>8</td><td>9/07 – 9/13</td><td>1-D Dynamic Programming</td><td>9問</td></tr>
+    <tr><td>9</td><td>9/14 – 9/20</td><td>2-D DP ＋ Intervals / Greedy</td><td>9問</td></tr>
+    <tr><td>10</td><td>9/21 – 9/30</td><td>総復習（間違えた問題の解き直し）＋ <strong>模擬面接2〜3回</strong></td><td>—</td></tr>
+  </tbody>
+</table>
+
+<p>順序は <a href="https://neetcode.io/roadmap">NeetCode Roadmap</a> の依存関係に従っています。
+後半のトピックは前半の上に積み上がるので、<strong>順番を入れ替えないこと</strong>。
+特に Graphs は Trees の、DP は再帰の理解を前提にします。</p>
+
+<h2>模擬面接（最重要）</h2>
+
+<p>ミッションは「<em>考えを声に出しながら</em>解ききる」ことです。
+問題を解く練習と、解きながら説明する練習は<strong>別の技能</strong>で、後者は独学では伸びません。
+現時点で未経験である以上、ここが最大のリスクです。</p>
+
+<ul>
+  <li><strong>第6週（8月下旬・約50問時点）に初回を必ず入れる</strong>。
+      上達してからではなく、下手なうちに1回受けるのが目的。何ができないかが分かれば残り4週間で直せます。</li>
+  <li>第10週に2〜3回。本番の1〜2週間前に「本番の感触」を作っておく。</li>
+  <li>場所：<a href="https://www.interviewing.io/">interviewing.io</a>（実在のエンジニア、匿名） /
+      <a href="https://www.pramp.com/">Pramp</a>（無料・ピア同士）。無料で始めるなら Pramp。</li>
+</ul>
+
+<div class="aside">
+  <span class="label">代替案</span>
+  <p>他人との模擬面接に抵抗があるなら、<strong>画面録画しながら独りで喋る</strong>だけでも効果があります。
+  沈黙した時間と、詰まったときに何を言ったかが客観的に見えます。ゼロよりはるかにマシですが、
+  第10週までには一度は人を相手にしてください。</p>
+</div>
+
+<h2>進捗が遅れたときの切り方</h2>
+
+<p>10週間の計画は必ずどこかで崩れます。崩れたとき、削る順序を先に決めておきます。</p>
+
+<ol>
+  <li><strong>削ってよい</strong>：各パターンの3問目以降。Hard 問題。Tries、Bit Manipulation、高度な数論。</li>
+  <li><strong>削ってよい</strong>：2-D DP（第9週）。頻度の割に習得コストが高い。1-D DP を優先。</li>
+  <li><strong>絶対に削らない</strong>：模擬面接。Trees / Graphs の基本。復習の時間。</li>
+</ol>
+
+<p>復習を削って新規問題を増やすのは、いちばんやりがちで、いちばん損な選択です。
+解いた問題を解き直さないと<strong>storage strength</strong>（長期保持）が育たず、面接当日に何も出てきません。</p>
+
+<div class="footer">
+  <p>関連：<a href="../MISSION.md">Mission</a> ·
+     <a href="../RESOURCES.md">Resources</a> ·
+     <a href="../lessons/0001-hash-map-collapse.html">Lesson 01</a> ·
+     <a href="./python-hash-cheatsheet.html">Python ハッシュ構造チートシート</a></p>
+  <p>この計画は固定ではありません。進み方を見て隔週で見直します。遅れたら私に言ってください——調整します。</p>
+</div>

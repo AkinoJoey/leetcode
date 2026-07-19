@@ -1,0 +1,132 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference — Python ハッシュ構造チートシート</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+
+<p class="eyebrow">Reference · 引くための資料</p>
+<h1>Python ハッシュ構造チートシート</h1>
+<p class="subtitle">面接中に手が止まらないための、最小限の構文と計算量。</p>
+
+<h2>計算量</h2>
+
+<table>
+  <thead><tr><th>操作</th><th>平均</th><th>最悪</th></tr></thead>
+  <tbody>
+    <tr><td><code>x in s</code> / <code>d[k]</code></td><td>O(1)</td><td>O(n)</td></tr>
+    <tr><td><code>s.add(x)</code> / <code>d[k] = v</code></td><td>O(1)</td><td>O(n)</td></tr>
+    <tr><td><code>del d[k]</code> / <code>s.remove(x)</code></td><td>O(1)</td><td>O(n)</td></tr>
+    <tr><td><code>list</code> に対する <code>x in lst</code></td><td>O(n)</td><td>O(n)</td></tr>
+  </tbody>
+</table>
+
+<p>最悪 O(n) はハッシュ衝突が総当たりになった場合。面接では「平均 O(1)」と言えば十分ですが、
+<strong>聞かれたら最悪 O(n) だと即答できる</strong>と一段評価が上がります。</p>
+
+<div class="aside">
+  <span class="label">よくある事故</span>
+  <p>「集合っぽい判定」を <code>list</code> でやると <code>in</code> が O(n) になり、ループの中で使えば静かに O(n²) に戻ります。
+  <code>if x in seen:</code> と書いた瞬間に、<code>seen</code> が <code>set</code> か <code>dict</code> かを必ず確認すること。</p>
+</div>
+
+<h2>四つの道具</h2>
+
+<h3>set — 「見たか？」だけを知りたい</h3>
+<pre><code>seen = set()
+seen.add(x)
+if x in seen: ...
+seen.discard(x)      # 無くてもエラーにならない（remove はエラー）
+
+# 集合演算（そのまま O(min(n,m)) 前後）
+a & b   # 積：両方にある
+a | b   # 和
+a - b   # 差</code></pre>
+
+<h3>dict — 「値に紐づく何か」を持ちたい</h3>
+<pre><code>d = {}
+d[k] = v
+d.get(k, 0)              # 無ければ既定値。KeyError を避ける定番
+d.setdefault(k, []).append(v)
+
+for k, v in d.items(): ...
+if k in d: ...           # d.keys() は不要</code></pre>
+
+<h3>collections.Counter — 個数を数える</h3>
+<pre><code>from collections import Counter
+
+c = Counter("aabbbc")           # Counter({'b':3, 'a':2, 'c':1})
+c['z']                          # → 0（KeyError にならない）
+c.most_common(2)                # → [('b',3), ('a',2)]
+Counter(s) == Counter(t)        # アナグラム判定がこの1行
+
+c1 - c2                         # 差（負の数は捨てられる点に注意）</code></pre>
+
+<h3>collections.defaultdict — キーの初期化を省く</h3>
+<pre><code>from collections import defaultdict
+
+groups = defaultdict(list)
+groups[key].append(word)        # キーが無くても [] から始まる
+
+adj = defaultdict(list)         # グラフの隣接リストの定番
+cnt = defaultdict(int)          # cnt[k] += 1 がそのまま書ける</code></pre>
+
+<div class="aside">
+  <span class="label">defaultdict の罠</span>
+  <p><code>if key in d</code> ではなく <code>d[key]</code> で<em>参照</em>しただけでキーが生成されます。
+  存在確認は必ず <code>in</code> を使うこと。</p>
+</div>
+
+<h2>キーにできるもの／できないもの</h2>
+
+<p>ハッシュ可能（immutable）なものだけがキーになります。ここは Medium で頻繁に踏みます。</p>
+
+<table>
+  <thead><tr><th>使える</th><th>使えない</th><th>回避策</th></tr></thead>
+  <tbody>
+    <tr><td><code>str</code>, <code>int</code>, <code>tuple</code></td><td><code>list</code></td><td><code>tuple(lst)</code></td></tr>
+    <tr><td><code>frozenset</code></td><td><code>set</code></td><td><code>frozenset(s)</code></td></tr>
+    <tr><td><code>tuple</code> のネスト</td><td><code>dict</code></td><td>キー項目を tuple 化</td></tr>
+  </tbody>
+</table>
+
+<pre><code># グリッドの座標を集合で持つ定番
+visited = set()
+visited.add((r, c))          # tuple なので OK。[r, c] は TypeError
+
+# アナグラムのキー：ソート結果を tuple/str にする
+key = tuple(sorted(word))    # または "".join(sorted(word))
+
+# 文字数カウントをキーにする（O(len) で作れる）
+key = tuple(count)           # count は長さ26のリスト</code></pre>
+
+<h2>典型テンプレート</h2>
+
+<h3>相方を先に問う（Two Sum 型）</h3>
+<pre><code>seen = {}
+for i, x in enumerate(nums):
+    if target - x in seen:
+        return [seen[target - x], i]
+    seen[x] = i              # 問うてから入れる（順序が重要）</code></pre>
+
+<h3>累積和 + 辞書（部分配列の和が k）</h3>
+<pre><code>from collections import defaultdict
+
+count = defaultdict(int)
+count[0] = 1                 # 「何も足していない状態」を1回として数える
+total = ans = 0
+for x in nums:
+    total += x
+    ans += count[total - k]  # 欲しい相方＝ total - k という累積和
+    count[total] += 1</code></pre>
+
+<h3>グループ化（Group Anagrams 型）</h3>
+<pre><code>groups = defaultdict(list)
+for word in words:
+    groups[tuple(sorted(word))].append(word)
+return list(groups.values())</code></pre>
+
+<div class="footer">
+  <p>関連レッスン：<a href="../lessons/0001-hash-map-collapse.html">Lesson 01 — 二重ループをハッシュで潰す</a></p>
+  <p>裏取り：<a href="https://www.techinterviewhandbook.org/algorithms/hash-table/">Tech Interview Handbook — Hash Table</a> ·
+     <a href="https://wiki.python.org/moin/TimeComplexity">Python Wiki — TimeComplexity</a></p>
+  <p>この資料は引くためのものです。読み込まずに、詰まったときだけ開いてください。</p>
+</div>

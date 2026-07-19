@@ -1,0 +1,184 @@
+/* 全レッスン共通スタイルシート。
+   Tufte風：本文は読みやすいセリフ、コードは等幅、余白は広く。
+   印刷にも耐えるように、色は控えめ・下線は残す。 */
+
+:root {
+  --bg: #fffef9;
+  --fg: #1a1a18;
+  --muted: #6b6b63;
+  --rule: #d8d5c8;
+  --accent: #8a3324;
+  --code-bg: #f4f2e8;
+  --ok: #2f6b3a;
+  --ng: #8a3324;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16161a;
+    --fg: #e8e6df;
+    --muted: #9a978c;
+    --rule: #35353c;
+    --accent: #e0876b;
+    --code-bg: #202027;
+    --ok: #7fbf8a;
+    --ng: #e0876b;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.7;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 8rem;
+  max-width: 42rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- 見出し --- */
+h1 {
+  font-size: 2rem;
+  line-height: 1.25;
+  font-weight: 600;
+  margin: 0 0 .3rem;
+  letter-spacing: -0.01em;
+}
+h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 3rem 0 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+h3 { font-size: 1.05rem; font-weight: 600; margin: 2rem 0 .5rem; }
+
+.subtitle {
+  color: var(--muted);
+  font-style: italic;
+  margin: 0 0 2.5rem;
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 .8rem;
+}
+
+/* --- 本文要素 --- */
+p { margin: 0 0 1.1rem; }
+a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+strong { font-weight: 600; }
+ul, ol { padding-left: 1.3rem; }
+li { margin-bottom: .5rem; }
+
+code {
+  font-family: var(--mono);
+  font-size: .84em;
+  background: var(--code-bg);
+  padding: .12em .35em;
+  border-radius: 3px;
+}
+pre {
+  font-family: var(--mono);
+  background: var(--code-bg);
+  border-left: 3px solid var(--rule);
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  font-size: .8rem;
+  line-height: 1.6;
+  border-radius: 0 4px 4px 0;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+
+blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1.1rem;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* --- 補足ボックス --- */
+.aside {
+  background: var(--code-bg);
+  border-radius: 5px;
+  padding: 1rem 1.2rem;
+  margin: 1.6rem 0;
+  font-size: .92rem;
+}
+.aside p:last-child { margin-bottom: 0; }
+.aside .label {
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: .4rem;
+}
+
+/* --- 表 --- */
+table { border-collapse: collapse; width: 100%; font-size: .9rem; margin: 1.5rem 0; }
+th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--rule); }
+th { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+
+/* --- クイズ（assets/quiz.js が使用） --- */
+.quiz { margin: 1.6rem 0; }
+.quiz-q { font-weight: 600; margin-bottom: .8rem; }
+.quiz-opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: .93rem;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: .6rem .85rem;
+  margin-bottom: .45rem;
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.quiz-opt:hover:not([disabled]) { border-color: var(--accent); }
+.quiz-opt[disabled] { cursor: default; opacity: .55; }
+.quiz-opt.correct { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 10%, transparent); opacity: 1; }
+.quiz-opt.wrong   { border-color: var(--ng); background: color-mix(in srgb, var(--ng) 10%, transparent); opacity: 1; }
+.quiz-fb {
+  font-size: .88rem;
+  color: var(--muted);
+  margin-top: .5rem;
+  padding-left: .85rem;
+  border-left: 2px solid var(--rule);
+  display: none;
+}
+.quiz-fb.show { display: block; }
+
+/* --- フッター --- */
+.footer {
+  margin-top: 4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  font-size: .88rem;
+  color: var(--muted);
+}
+.footer a { color: var(--accent); }
+
+/* --- 印刷 --- */
+@media print {
+  :root { --bg: #fff; --fg: #000; --code-bg: #f4f4f4; }
+  body { font-size: 11pt; padding: 0; max-width: none; }
+  .quiz-opt { break-inside: avoid; }
+  .quiz-fb { display: block; }
+  h2 { break-after: avoid; }
+}

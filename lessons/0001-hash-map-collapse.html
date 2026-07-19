@@ -1,0 +1,143 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 01 — 二重ループをハッシュで潰す</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+
+<p class="eyebrow">Lesson 01 · 所要 15分</p>
+<h1>二重ループをハッシュで潰す</h1>
+<p class="subtitle">Easy と Medium を隔てる、いちばん頻度の高い一手。</p>
+
+<p>あなたのミッションは<a href="../MISSION.md">初見の Medium を45分で解ききること</a>です。
+Easy が解けて Medium で止まる人の詰まり方には、はっきりした偏りがあります。
+<strong>解法は思いつくが、それが O(n²) で、そこから先に進めない</strong>——これです。</p>
+
+<p>そして O(n²) から O(n) への引き上げは、その大半がたった一つの型で説明できます。
+今日はその型を一つだけ、確実に手に入れます。</p>
+
+<h2>知識：欲しい相方を、先に言葉にする</h2>
+
+<p>素朴な二重ループは、いつもこう書かれます。</p>
+
+<pre><code>for i in range(n):
+    for j in range(i):        # ← 内側は「過去に見た要素」を探しているだけ
+        if nums[i] + nums[j] == target:
+            return [j, i]</code></pre>
+
+<p>内側のループがやっている仕事は「探索」です。そして<strong>探索は、辞書に置き換えられます</strong>。
+置き換えの手順は機械的です。</p>
+
+<ol>
+  <li><strong>いま見ている要素 <code>x</code> に対して、「どんな相方がいれば嬉しいか」を一文で言う。</strong>
+      Two Sum なら「<code>target - x</code> という値」。</li>
+  <li>その一文を、そのまま辞書への問い合わせにする。<code>if target - x in seen:</code></li>
+  <li>見終わった要素を辞書に入れて、次へ進む。</li>
+</ol>
+
+<pre><code>def two_sum(nums, target):
+    seen = {}                      # 値 -> その値があった添字
+    for i, x in enumerate(nums):
+        if target - x in seen:     # 「欲しい相方」を先に問う
+            return [seen[target - x], i]
+        seen[x] = i
+    return []</code></pre>
+
+<div class="aside">
+  <span class="label">なぜ効くのか</span>
+  <p>ハッシュ表の検索は平均 O(1) です。内側ループ（O(n)）が定数時間の1回の問い合わせに畳まれるので、
+  全体が O(n²) → O(n) になります。代わりに O(n) のメモリを使う——<strong>時間をメモリで買っている</strong>、
+  というのが面接で口に出すべき説明です。</p>
+</div>
+
+<h3>同じ型の、三つの顔</h3>
+
+<p>この型は問題ごとに姿を変えますが、正体は同じ「先に問う」です。
+辞書に<em>何を</em>入れるかだけが違います。</p>
+
+<table>
+  <thead>
+    <tr><th>辞書に入れるもの</th><th>問いの形</th><th>代表問題</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>set</code>：見た値</td><td>「この値、もう見た？」</td><td>Contains Duplicate</td></tr>
+    <tr><td><code>dict</code>：値 → 添字</td><td>「相方の値はどこ？」</td><td>Two Sum</td></tr>
+    <tr><td><code>Counter</code>：値 → 個数</td><td>「これ何個あった？」</td><td>Group Anagrams</td></tr>
+  </tbody>
+</table>
+
+<p>構文の細部は <a href="../reference/python-hash-cheatsheet.html">Python ハッシュ構造チートシート</a> にまとめてあります。
+暗記せず、必要なとき引いてください。</p>
+
+<h2>技能：思い出す</h2>
+
+<p>読んで分かるのと、45分の面接で出てくるのは別物です。ここから先は<strong>本文を見ずに</strong>答えてください。
+外すのは想定内で、外したほうが定着します。</p>
+
+<div class="quiz">
+  <p class="quiz-q">1. 配列から「和が target になる2数」を O(n) で探すとき、ループの中で最初に問うべきことは？</p>
+  <button class="quiz-opt" data-correct>target − x は既出か</button>
+  <button class="quiz-opt">target + x は既出か</button>
+  <button class="quiz-opt">x は target より小か</button>
+  <button class="quiz-opt">x の個数は2以上か</button>
+  <p class="quiz-fb">「欲しい相方を先に言葉にする」——<code>x</code> と組んで target になる相手は <code>target - x</code>。
+  それを、まだ <code>x</code> を辞書に入れる<em>前</em>に問うのが要点です（同じ要素を二度使わないため）。</p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">2. 素朴な二重ループを「辞書で潰せる」と判断してよい合図は？</p>
+  <button class="quiz-opt" data-correct>内側が過去要素の検索</button>
+  <button class="quiz-opt">内側が全要素の並び替え</button>
+  <button class="quiz-opt">外側が配列を逆順に走査</button>
+  <button class="quiz-opt">外側が再帰で分割している</button>
+  <p class="quiz-fb">内側ループの仕事が<strong>探索</strong>なら潰せます。逆に、内側が並び替え・区間の伸縮・状態の積み上げをしているなら、
+  それはソートや sliding window、DP など別のパターンの領域です。</p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">3. この型のコストとして、面接で必ず口に出すべきトレードオフは？</p>
+  <button class="quiz-opt" data-correct>空間が O(n) 増える</button>
+  <button class="quiz-opt">比較の回数が倍増する</button>
+  <button class="quiz-opt">入力の順序が失われる</button>
+  <button class="quiz-opt">再帰の深さが増加する</button>
+  <p class="quiz-fb">時間をメモリで買っています。面接官は最適化そのものより、
+  <strong>あなたが対価を自覚しているか</strong>を見ています。「O(n) の追加メモリと引き換えです」の一言が効きます。</p>
+</div>
+
+<h2>実践：今日やること</h2>
+
+<p>順番どおりに。各問 20〜30分で詰まったら解答を読む——これが
+<a href="https://blog.neetcode.io/p/prepare-coding-interviews">NeetCode の推奨する時間設計</a>です。</p>
+
+<ol>
+  <li><a href="https://leetcode.com/problems/contains-duplicate/">Contains Duplicate</a>（Easy）— 助走。<code>set</code> 版。3分。</li>
+  <li><a href="https://leetcode.com/problems/two-sum/">Two Sum</a>（Easy）— 上のコードを<strong>見ずに</strong>書き直す。</li>
+  <li><a href="https://leetcode.com/problems/group-anagrams/">Group Anagrams</a>（<strong>Medium</strong>）— 今日の本命。
+      「何をキーにすれば同じグループが同じ箱に落ちるか」を先に一文で言ってから書き始めること。</li>
+</ol>
+
+<div class="aside">
+  <span class="label">詰まったら</span>
+  <p>Group Anagrams で手が止まったら、答えを見る前にこの問いだけ自分に投げてください——
+  <em>「同じアナグラムどうしが必ず一致する値を、文字列から作れるか？」</em></p>
+</div>
+
+<h2>今日の一次情報</h2>
+
+<blockquote>
+  ほとんどのコーディング問題は約20のパターンのどれかに落ちる。
+  各パターンを5〜10問こなして内在化すれば、見たことのない問題も解ける。
+</blockquote>
+
+<p>読むべきもの（1本だけ）：<a href="https://blog.neetcode.io/p/prepare-coding-interviews">How to Prepare for Coding Interviews — NeetCode</a>。
+問題数を稼ぐ勉強法がなぜ失敗するかが書かれています。短期集中のあなたには、この方針の理解が最初の投資対効果です。</p>
+
+<div class="footer">
+  <p><strong>分からないところは、そのまま私に聞いてください。</strong>
+  私はこのワークスペースのあなたの講師です。「Group Anagrams のキーの作り方が腑に落ちない」「なぜ set より dict なのか」——
+  粒度は問いません。質問は次のレッスン設計にそのまま反映されます。</p>
+  <p>次回予告：この型が<em>効かない</em>問題を見分ける。→ two pointers と sliding window の分岐。</p>
+  <p><a href="../MISSION.md">Mission</a> ·
+     <a href="../RESOURCES.md">Resources</a> ·
+     <a href="../reference/python-hash-cheatsheet.html">Python ハッシュ構造チートシート</a></p>
+</div>
+
+<script src="../assets/quiz.js"></script>
