@@ -53,6 +53,52 @@
   なぜ最後に <code>max</code> を取ってよいかが説明できる。窓の長さは <code>right - left + 1</code>（+1 を落とすのが定番のバグ）。</p>
 </div>
 
+<h3><code>is_invalid</code> の導き方 ← この型の本体</h3>
+
+<p>
+上の <code>is_invalid</code> は<strong>関数名であって答えではない</strong>。骨格は毎回同じで、
+問題ごとに違うのはここだけ。<strong>ひらめきではなく3段の翻訳で出す。</strong>
+</p>
+
+<ol>
+  <li><strong>日本語</strong>：問題文から「valid とは何か」を一文で書く（考えない。写す）</li>
+  <li><strong>量</strong>：その一文を、窓の中で<em>数えられる量</em>に言い換える</li>
+  <li><strong>不等号</strong>：その量を <code>&gt;</code> / <code>&lt;</code> で条件式にする</li>
+</ol>
+
+<table>
+  <thead><tr><th>問題</th><th>① valid とは（日本語）</th><th>②③ invalid の式</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>3. Longest Substring</td>
+      <td>窓の中に重複がない</td>
+      <td><code>s[right] in seen</code></td>
+    </tr>
+    <tr>
+      <td>424. Character Replacement</td>
+      <td>k 回以下の置き換えで全部同じ文字にできる</td>
+      <td><code>(right-left+1) - max_freq &gt; k</code></td>
+    </tr>
+    <tr>
+      <td>1004. Max Consecutive Ones III</td>
+      <td>k 個以下の 0 を 1 に変えれば全部 1 にできる</td>
+      <td><code>zero_count &gt; k</code></td>
+    </tr>
+    <tr>
+      <td>209. Minimum Size Subarray Sum</td>
+      <td>窓の和が target 以上（※最短型なので valid で縮める）</td>
+      <td><code>total &gt;= target</code> で縮める</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="aside">
+  <p>
+  <strong>①を飛ばすと必ず事故る。</strong>424 で <code>counter[char] &gt; k</code> と書いてしまうのが典型例
+  —— 問題文のどの文とも対応していない式。<strong>コードより先に日本語一文を書く。</strong>
+  </p>
+</div>
+
 <h3>最短を求める場合</h3>
 
 <p>不等号の向きが逆になる。「valid になるまで伸ばし、valid な<em>間</em>縮めながら答えを更新」。</p>
@@ -117,6 +163,10 @@ for right in range(k, len(nums)):
 <h2>7. Python の地雷</h2>
 
 <ul>
+  <li><strong>添字と値を取り違えない。</strong><code>counter[s[left]] -= 1</code> であって
+      <code>counter[left] -= 1</code> ではない。<code>left</code> は数、キーは文字。
+      後者はエラーを出さずに静かに壊れるので発見が遅れる。</li>
+  <li>前の問題で使った変数名（<code>seen</code> など）の残留に注意。問題を移るときはコピーせず白紙から書く。</li>
   <li><code>del counter[c]</code> を忘れると、値0のキーが残って <code>len(counter)</code> が狂う。
       「種類数」を条件に使うなら、0になったキーは消すこと。</li>
   <li><code>defaultdict(int)</code> は<strong>参照しただけでキーが生える</strong>。

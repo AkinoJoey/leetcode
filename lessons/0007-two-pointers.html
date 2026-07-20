@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 07 — 捨ててよい理由を言う（Two Pointers）</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 07 · Two Pointers</p>
+<h1>捨ててよい理由を言う</h1>
+<p class="subtitle">新しいパターン。ただし、難しいのは動かし方ではない。</p>
+
+<h2>sliding window は完了</h2>
+
+<p>1004 を10分で完答。4問通ったので、この型は獲得済みとみなします。振り返ると：</p>
+
+<table>
+  <tr><th>潰したもの</th><th>その後</th></tr>
+  <tr><td>境界のオフバイワン（Lesson 03）</td><td>再発ゼロ</td></tr>
+  <tr><td>償却論法の根拠（Lesson 04）</td><td>[時間3] を <code>n</code> と正しく書けた</td></tr>
+  <tr><td><code>is_invalid</code> の導出（Lesson 05）</td><td>424・1004 とも自力</td></tr>
+  <tr><td>説明の精度（Lesson 06）</td><td>rubric 全項目クリア</td></tr>
+</table>
+
+<p>
+<code>⚠</code> に <code>while 0 in counter and counter[0] &gt; k</code> を挙げたのも的確でした。
+あれはこのコードで唯一議論の余地がある行です（<code>defaultdict</code> は<strong>参照しただけでキーが生える</strong>ので、
+<code>0 in counter</code> の防御には意味があります）。<strong>自信のなさの照準が合っています。</strong>
+</p>
+
+<div class="aside">
+  <span class="label">一点だけ：状態は必要最小限に</span>
+  <p>
+  1004 で知りたいのは<strong>0 の個数だけ</strong>です。<code>defaultdict</code> ではなく
+  <code>zero_count = 0</code> という int 一つで足ります。424 からの惰性ですね。<br>
+  減点はしません（動くので）。ただし面接では<strong>状態が小さいほど説明が短くなり、バグも減ります</strong>。
+  「窓の中で本当に知りたいのは何か」を、状態を選ぶ前に一言で言う癖をつけてください。
+  </p>
+</div>
+
+<h2>今日の型：両端から挟み撃つ</h2>
+
+<pre><code>left, right = 0, len(arr) - 1
+
+while left &lt; right:
+    if 条件を満たす:  return ...
+    elif 小さすぎる:  left += 1     # 大きくしたい
+    else:             right -= 1    # 小さくしたい</code></pre>
+
+<p>
+計算量は<strong>そのまま3文テンプレートが使えます</strong>。
+<code>left</code> は増えるだけ、<code>right</code> は減るだけ。各要素は最大2回。合計 2n で O(n)。
+<strong>Lesson 04 で作った道具が、パターンをまたいで再利用できます。</strong>
+</p>
+
+<h2>難所は「動かし方」ではない</h2>
+
+<p>
+骨格は一目で分かるはずです。この型で面接官が踏み込むのは、<strong>別の場所</strong>です。
+</p>
+
+<p>
+<code>left += 1</code> をした瞬間、あなたは <code>arr[left]</code> を<strong>永久に捨てています</strong>。
+二度と見に戻りません。ではなぜ、そこに正解がないと言い切れるのか。
+</p>
+
+<blockquote>
+  ——「なるほど。ではその要素を捨ててよい理由を説明してもらえますか？」
+</blockquote>
+
+<p>
+<strong>これが Two Pointers の <code>is_invalid</code> にあたる場所</strong>です。
+前回、テンプレートが難所を隠していたので、今回は最初から開けておきます。
+</p>
+
+<h3>導出の3段</h3>
+
+<ol>
+  <li><strong>いま持っている値</strong>を書く（和、面積など）</li>
+  <li><strong>どちらを動かせば目的の方向に動くか</strong>を、ソート順から言う</li>
+  <li><strong>捨てる側に、より良い答えが残っていない理由</strong>を一文で言う</li>
+</ol>
+
+<h2>167. Two Sum II で実演</h2>
+
+<p><code>arr = [2, 7, 11, 15]</code>、<code>target = 18</code>。<code>left=0, right=3</code> から始めます。</p>
+
+<div class="check" data-answer="17">
+  <p class="check-q">1. 最初の <code>arr[left] + arr[right]</code> は？</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">2 + 15 = 17。target の 18 より<strong>小さい</strong>ので、和を大きくしたい。</p>
+</div>
+
+<div class="check" data-answer="left" data-alt="left+=1|左|leftを動かす">
+  <p class="check-q">2. 和を大きくするには、<code>left</code> と <code>right</code> のどちらを動かすか？</p>
+  <input class="check-in" type="text" placeholder="left または right">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><code>left</code>。ソート済みなので <code>left</code> を右に動かすと値が<strong>増えます</strong>。
+  <code>right</code> を動かすと減ってしまう。<strong>②はソート順から機械的に決まります。</strong></p>
+</div>
+
+<div class="check" data-answer="15" data-alt="arr[right]|一番大きい要素|最大">
+  <p class="check-q">3. ここが本番。<code>arr[left]=2</code> を捨てても大丈夫だと言うには、2 が<strong>どの相手</strong>と組んだ結果を見れば十分か？（数字で）</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  <strong>15</strong>（＝残っている中で最大の相手）。<br>
+  2 にとって<strong>いちばん有利な相手</strong>と組んでも和は17で、まだ18に届かない。
+  他の相手はもっと小さいのだから、2 は<strong>誰と組んでも絶対に届かない</strong>。だから捨ててよい。<br>
+  <strong>これが③です。</strong>「最も有利な条件で試してもダメだったから、残りは見なくてよい」——
+  この論法は two pointers の全問題で同じ形をしています。</p>
+</div>
+
+<div class="aside">
+  <span class="label">面接での言い方</span>
+  <p>
+  「<code>left</code> はいま<strong>最大の相手</strong>と組んでも target に届きません。
+  他のどの相手ともっと組んでも和は小さくなるだけなので、<code>left</code> は<strong>解に含まれ得ません</strong>。
+  よって安全に捨てられます。」
+  </p>
+</div>
+
+<h2>今日の課題</h2>
+
+<ol>
+  <li>
+    <strong><a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/">167. Two Sum II</a></strong>（助走。骨格がそのまま動きます）<br>
+    <span style="color:var(--muted)">※ 1-indexed で答えを返す問題です。問題文を読んでください。</span>
+  </li>
+  <li>
+    <strong><a href="https://leetcode.com/problems/container-with-most-water/">11. Container With Most Water</a></strong>（本番。③が難しい問題です）<br>
+    面積は <code>min(h[l], h[r]) × (r - l)</code>。<strong>低いほうを動かします</strong>が、
+    <strong>なぜ高いほうを残してよいのか</strong>を先に一文で書いてから実装してください。
+  </li>
+</ol>
+
+<div class="aside">
+  <span class="label">rubric の変更</span>
+  <p>
+  <strong>ボトルネックの欄を「何の<em>再計算</em>を避けたか」に変更します。</strong><br>
+  1004 では「全ての部分配列を取り出すのが無駄」と書きましたね。前回お渡しした
+  「重なった部分を数え直している」は、次の問題では出てきませんでした。<br>
+  <strong>これは責めていません。</strong>一度読んで納得したことが、次の問題で自分から出るとは限らない
+  ——それが普通です。だから欄の名前のほうを変えます。<strong>枠が具体的なら、埋まります。</strong><br>
+  さらに two pointers 用に <strong><code>③ 捨ててよい理由:</code></strong> の欄を追加してください。
+  </p>
+</div>
+
+<h2>読むもの</h2>
+
+<p>
+<a href="https://www.youtube.com/watch?v=UuiTKBwPgAo">NeetCode — Container With Most Water</a>。
+<strong>③の説明の仕方</strong>に注目して見てください（解法そのものは上で分かるはずです）。
+話し方のモデルとして使うのが目的です。<strong>模擬面接の前に、良い説明を耳から入れておく価値があります。</strong>
+</p>
+
+<div class="footer">
+  <p>
+    関連：<a href="0004-amortized-argument.html">Lesson 04 — 償却論法（3文テンプレート）</a> ·
+    <a href="0006-complexity-rubric.html">Lesson 06 — 計算量の rubric</a> ·
+    <a href="../reference/two-pointers-template.html">Two Pointers テンプレート</a> ·
+    <a href="../reference/interview-protocol.html">面接プロトコル</a>
+  </p>
+  <p>
+    <strong>11 で③が出てこなかったら、実装を止めて聞いてください。</strong>
+    ここは手を動かして偶然通すより、言葉にしてから書くほうが速い場所です。
+  </p>
+</div>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

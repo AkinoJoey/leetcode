@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 06 — 計算量を減点されない形で言う</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 06 · 説明の精度</p>
+<h1>計算量を減点されない形で言う</h1>
+<p class="subtitle">コードは通った。だが面接で点が付くのは、そのあとの3分。</p>
+
+<h2>いま起きていること</h2>
+
+<p>424 は自力で完答。境界エラーもゼロ。<code>is_invalid</code> の導出は1回で身につきました。<br>
+そして <code>⚠ いちばん自信のない行</code> に <code>while</code> の条件式を挙げましたね。
+<strong>まさに核心の行です。</strong>「なし」を禁止した効果が初回から出ています。この形式は続けます。</p>
+
+<p>問題は別のところに移りました。</p>
+
+<table>
+  <tr><th></th><th>実装</th><th>説明（②⑥）</th></tr>
+  <tr><td>問題 3</td><td>正しい</td><td>「各要素は最大<strong>1回</strong>」← 誤り</td></tr>
+  <tr><td>問題 424</td><td>正しい</td><td>空間 <code>O(min(1, 26))</code> ← 誤り</td></tr>
+</table>
+
+<p>
+<strong>2回連続で、コードは正しく、説明が間違っています。</strong><br>
+ミッションは「初見の Medium を、<strong>考えを声に出しながら</strong>解ききる」でした。
+説明はおまけではなく<strong>成果物そのもの</strong>です。今日はここを実装と同じ精度まで引き上げます。
+</p>
+
+<h2>今回の3つの誤り</h2>
+
+<h3>① 空間 <code>O(min(1, 26(A-Z)))</code></h3>
+
+<p>この式を文字どおり計算すると、<strong>1</strong> です。<code>min</code> は小さいほうを取るので。</p>
+
+<p>
+何が起きたか。問題3で教えた <code>O(min(n, 文字種))</code> という<strong>形だけを流用</strong>しました。
+あの `min` は「文字列長 n」と「文字種」という<strong>性質の違う2つの上限</strong>を比べていたものです。
+424 では上限は26だけ。比べる相手がいません。
+</p>
+
+<p>
+面白いのは、あなたが添えた日本語は<strong>正しい</strong>ことです
+（「キーは1つ〜26個」）。前回は日本語が誤りで結論が正しかった。<strong>今回は逆です。</strong>
+</p>
+
+<h3>② <code>max(counter.values())</code> の走査に言及なし</h3>
+
+<p>
+これは前回のレッスンのドリル6で扱い、「<strong>黙って O(n) と言うと突っ込まれます</strong>」と
+名指しで警告した箇所です。それが翌回に落ちました。<strong>知識としては入り、習慣にはなっていない。</strong>
+</p>
+
+<h3>③ ②の素朴解に、古い模型が残っている</h3>
+
+<blockquote>二重ループを回して出現した文字の<strong>種類</strong> &gt; k になるまで数える</blockquote>
+
+<p>
+これは誤りです。<strong>種類数と置換回数を混同</strong>しています。
+そしてこれは、424 で最初に詰まったときの <code>counter[char] &gt; k</code> と<strong>同じ誤った模型</strong>です。
+</p>
+
+<p>
+つまり——<strong>正しいコードを書いた直後に、誤った素朴解を書いている。</strong>
+コードが動いたことと、自分が何を実装したか言語化できることは、別です。
+</p>
+
+<h2>採点基準（rubric）</h2>
+
+<p>
+⑥を自由記述にするのをやめます。<strong>言うべき要素を固定</strong>して、欠けを自分で検出できるようにします。
+</p>
+
+<h3>時間計算量 — 2要素</h3>
+
+<ol>
+  <li><strong>外側が何回</strong>回るか</li>
+  <li><strong>内側の1回あたりのコスト</strong>（定数なら「定数です」と明言する）</li>
+</ol>
+
+<p>424 なら：外側は n 回。内側の <code>max(counter.values())</code> は最大26回＝定数。よって O(26n) = O(n)。</p>
+
+<h3>空間計算量 — 導出手順</h3>
+
+<p>
+idiom を暗記するのをやめます。<strong>「状態が持ちうる最大の要素数は何か」</strong>を毎回考える。それだけです。
+</p>
+
+<ol>
+  <li>状態は何か → <code>counter</code></li>
+  <li>そこに入りうる<strong>最大の要素数</strong>は → 文字種の数、最大26</li>
+  <li>それは入力サイズに<strong>依存するか</strong> → しない（定数） → <strong>O(1)</strong></li>
+</ol>
+
+<div class="check" data-answer="o(1)" data-alt="1|O(1)">
+  <p class="check-q">1. 424 の空間計算量を、上の手順どおりに書くと？</p>
+  <input class="check-in" type="text" placeholder="O(...) の形で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><strong>O(1)</strong>。26 は定数なので入力サイズに依存しません。
+  面接では「<code>counter</code> のキーは最大26個で定数なので O(1) です」と、<strong>数と理由をセットで</strong>言う。</p>
+</div>
+
+<div class="check" data-answer="o(min(n,26))" data-alt="O(min(n, 26))|o(min(n,文字種))|min(n,26)">
+  <p class="check-q">2. では問題3（Longest Substring, 入力は英数字記号）の空間は？ 手順3まで踏んで答えてください</p>
+  <input class="check-in" type="text" placeholder="O(...) の形で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  <code>O(min(n, 文字種))</code>。<strong>ここでは <code>min</code> に意味があります</strong>：
+  <code>seen</code> の大きさは文字列長 n でも頭打ちになるし（n 文字しか入れられない）、
+  文字種でも頭打ちになる。<strong>上限が2つあるから小さいほうを取る。</strong>
+  424 には上限が1つしかないので <code>min</code> は不要でした。</p>
+</div>
+
+<div class="check" data-answer="26" data-alt="定数|o(1)">
+  <p class="check-q">3. 「内側の1回あたりのコスト」を明言する要素。424 で言い落とした数は？</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">26。<code>max(counter.values())</code> が毎回走査する要素数です。
+  <strong>結論の O(n) が変わらなくても、言及したかどうかで評価は変わります。</strong>
+  「気づいた上で定数だから落とした」のか「気づいていない」のかを、面接官はここで見ています。</p>
+</div>
+
+<h3>素朴解 — 「直訳」の定義に戻る</h3>
+
+<p>
+素朴解は<strong>アイデアではなく、問題文の直訳</strong>です。工夫を入れた瞬間に素朴解ではなくなります。
+</p>
+
+<blockquote>
+  すべての部分文字列を取り出して、それぞれについて<strong>「長さ − 最頻文字の数 &lt;= k」か</strong>を確かめる。
+  部分文字列は O(n²) 通り、判定が O(26) なので O(n²)。<br>
+  ボトルネックは、<strong>部分文字列ごとに数え直している</strong>こと。
+</blockquote>
+
+<p>
+比べてください。あなたの②には「最頻文字」が一度も出てきません。
+<strong>素朴解に出てこない概念は、最適解でも使えないはずです。</strong>
+②が正しく書けていれば、<code>counter[char] &gt; k</code> で詰まることもなかった。
+</p>
+
+<div class="aside">
+  <span class="label">②の検算法</span>
+  <p>
+  素朴解を書いたら、<strong>最適解に出てくる主要な量が、素朴解にも登場しているか</strong>を確かめる。
+  424 の最適解の主役は <code>max_freq</code>。②にそれがなければ、②が間違っています。
+  </p>
+</div>
+
+<h2>今日の課題</h2>
+
+<ol>
+  <li>
+    <strong>424 の⑥を書き直す。</strong>コードは変えなくて構いません。
+    <strong>rubric の全要素（外側の回数／内側のコスト／空間の導出3段／正しい素朴解）</strong>を埋めた形で貼ってください。
+  </li>
+  <li>
+    <strong><a href="https://leetcode.com/problems/max-consecutive-ones-iii/">1004. Max Consecutive Ones III</a> を解く。</strong>
+    <code># valid とは:</code> を1行目に。今度は<strong>提出前に</strong> rubric を見て⑥の欠けを自分でチェックすること。
+  </li>
+</ol>
+
+<p>
+1004 の <code>is_invalid</code> は 424 より<strong>簡単</strong>です。同じ導出手順が通ります
+（<a href="../reference/sliding-window-template.html">テンプレートの対応表</a>にも載せてあります。詰まったら見て構いません）。
+今回の主眼はアルゴリズムではなく<strong>⑥の精度</strong>です。
+</p>
+
+<h2>読むもの</h2>
+
+<p>
+<a href="https://www.techinterviewhandbook.org/coding-interview-rubrics/">Tech Interview Handbook — Coding Interview Rubrics</a>。
+<strong>面接官が実際に何を採点しているか</strong>が項目別に書かれています。
+コードの正しさは4項目のうち1つでしかない、という事実を一度見ておく価値があります。
+今日のレッスンの根拠でもあります。
+</p>
+
+<div class="footer">
+  <p>
+    関連：<a href="0005-deriving-is-invalid.html">Lesson 05 — is_invalid の導出</a> ·
+    <a href="0004-amortized-argument.html">Lesson 04 — 償却論法</a> ·
+    <a href="../reference/interview-protocol.html">面接プロトコル（rubric 追記済み）</a> ·
+    <a href="../reference/sliding-window-template.html">テンプレート</a>
+  </p>
+  <p>
+    <strong>質問してください。</strong>特に「なぜ 424 は <code>min</code> が不要で、3 では必要なのか」が
+    腑に落ちないなら、そこは流さないでください。空間計算量はこの先ずっと聞かれます。
+  </p>
+</div>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

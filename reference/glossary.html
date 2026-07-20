@@ -48,8 +48,15 @@ sliding window の <code>left</code>（進むか止まるか、戻らない）�
 重い反復は起こりうるが、それが n 回連続では起こりえないため。合計 <code>n + n = O(n)</code> が正しい。</p>
 <p>日常の例：年12回の家賃を「最も高くつく日 × 365日」と数えないのと同じ。実際に発生する合計を見る。</p>
 
-<h3>面接での言い方</h3>
-<blockquote>二重ループに見えますが、<code>left</code> は戻らないので内側は全体で n 回しか回りません。よって O(n) です。</blockquote>
+<h3>面接での言い方（3文テンプレート）</h3>
+<blockquote>
+  <p>① 二重ループに見えますが、<code>left</code> も <code>right</code> も<strong>戻りません</strong>。</p>
+  <p>② そのため各要素は、<strong>入るときと出るときの最大2回</strong>しか触られません。</p>
+  <p>③ 全体で最大 2n 回の操作なので、時間は <strong>O(n)</strong> です。</p>
+</blockquote>
+<p><strong>「1回」ではなく「2回」。</strong>入るのが1回、出るのが1回。ここを1回と言うと理解の浅さを疑われる。</p>
+<p>two pointers、sliding window、単調スタックで<strong>そのまま使い回せる</strong>。
+詳細は <a href="../lessons/0004-amortized-argument.html">Lesson 04</a>。</p>
 
 <h2>データ構造まわり</h2>
 
@@ -59,6 +66,11 @@ sliding window の <code>left</code>（進むか止まるか、戻らない）�
 不可：<code>list</code> <code>dict</code> <code>set</code> <code>Counter</code></p>
 <p>詰まったら <code>tuple()</code> や <code>frozenset()</code> に変換する。
 詳細は <a href="./python-hash-cheatsheet.html">Python ハッシュ構造チートシート</a>。</p>
+
+<h3>オフバイワン（off-by-one）</h3>
+<p><strong>範囲や個数の指定が、正解より1だけ多い／少ない誤り。</strong></p>
+<p>「0 から数えるか 1 から数えるか」「終端を含むか含まないか」が食い違うときに起きる。
+対処は推論ではなく代入検算 → <a href="./boundary-checklist.html">境界の検算チェックリスト</a>。</p>
 
 <h3>不変条件（invariant）</h3>
 <p><strong>コードの特定の地点で、必ず成り立っていると言い切れる条件。</strong></p>

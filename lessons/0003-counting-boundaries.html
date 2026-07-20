@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 03 — 境界は推論しない、数える</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 03 · 境界</p>
+<h1>境界は推論しない、数える</h1>
+<p class="subtitle">アルゴリズムは合っているのに通らない。犯人はいつも同じ場所にいる。</p>
+
+<h2>今日の1つの狙い</h2>
+
+<p>
+前回、<a href="https://leetcode.com/problems/maximum-average-subarray-i/">Maximum Average Subarray I</a> が自力で解けませんでした。
+ここで確認しておきたいのは、<strong>詰まった場所がアルゴリズムではなかった</strong>ということです。
+</p>
+
+<p>
+前回のセッションの記録を見ると、あなたは「窓を右に1つずらすとき、出ていく1個を引いて入ってくる1個を足す」という
+考え方には自力で到達しています。つまり<strong>解法は分かっていた</strong>。
+にもかかわらず通らなかった。1セッションで3回、同じ種類の事故が起きています。
+</p>
+
+<ul>
+  <li><code>range(len(prices), 0, -1)</code> — 初回で <code>IndexError</code>、しかも添字 0 に届かない</li>
+  <li><code>right - left + 1</code> の <code>+1</code> が要る理由を説明できない</li>
+  <li><code>range(k+1)</code> で初期窓を k+1 個ぶん合計してしまう（同一セッション内で2回）</li>
+</ul>
+
+<p>
+3つとも<strong>オフバイワン</strong>です。1個ずれ。<br>
+今日のレッスンは新しいパターンを増やしません。この1点だけを潰します。
+</p>
+
+<div class="aside">
+  <span class="label">用語</span>
+  <p><strong>オフバイワン（off-by-one）</strong>：範囲や個数の指定が、正解より1だけ多い／少ない誤り。
+  「0 から数えるか 1 から数えるか」「終端を含むか含まないか」が食い違うときに起きる。
+  <a href="../reference/glossary.html">用語集</a>に追加済み。</p>
+</div>
+
+<h2>原因：あなたは境界を「推論」している</h2>
+
+<p>
+前回のあなたの発話には、こういう形が繰り返し出てきました。
+</p>
+
+<blockquote>「<code>range</code> は終端を含まないから、たぶん <code>+1</code> が要るはず」</blockquote>
+
+<p>
+これは<strong>推論</strong>です。前提（range は終端を含まない）は正しい。
+でも、そこから「だから +1」までの一歩は、頭の中で暗算しています。
+そして人間の暗算は、境界に関しては驚くほど当たりません。あなただけの話ではなく、
+プロのエンジニアが最も多く出すバグの種類がこれです。
+</p>
+
+<p>
+対処は、推論をやめることです。代わりに<strong>機械的な手続き</strong>に置き換えます。
+</p>
+
+<h2>道具：3秒でできる代入検算</h2>
+
+<p>
+境界に迷った瞬間に、必ずこれをやります。例外なく、毎回です。
+</p>
+
+<ol>
+  <li><strong>いちばん小さい具体値を置く。</strong><code>nums = [1, 2, 3]</code>、<code>k = 2</code> くらい。</li>
+  <li><strong>答えを手で書き出す。</strong>「窓は <code>[1,2]</code> と <code>[2,3]</code> の2つ」</li>
+  <li><strong>自分のコードにその値を入れて、一致するか見る。</strong></li>
+</ol>
+
+<p>
+重要なのは順番です。<strong>先に手で答えを出してから、コードを見る。</strong>
+コードを先に見ると、脳はそれを正当化する方向に働きます。
+</p>
+
+<div class="aside">
+  <span class="label">なぜ小さい値なのか</span>
+  <p>
+  <code>nums</code> が10要素だと、頭の中で数えるコストが高すぎて検算そのものが失敗します。
+  3要素なら指で数えられる。<strong>検算は、暗算しなくて済むサイズでやる。</strong>
+  </p>
+</div>
+
+<h2>ドリル：数えるだけ</h2>
+
+<p>
+ここからは書いて答えてください。<strong>推論せず、まず紙かエディタに具体値を書き出してから</strong>入力すること。
+即答できたとしても、書き出す手順を踏んでください。今日鍛えたいのは答えではなく手続きです。
+</p>
+
+<div class="check" data-answer="2">
+  <p class="check-q">1. <code>nums = [1, 2, 3]</code>、<code>k = 2</code>。長さ2の連続部分列はいくつあるか？</p>
+  <input class="check-in" type="text" placeholder="個数を半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><code>[1,2]</code> と <code>[2,3]</code> の2つ。一般に長さ n の配列に長さ k の窓は <strong>n - k + 1</strong> 個。
+  3 - 2 + 1 = 2。この式も暗記ではなく、いま数えた結果と一致することを確認してください。</p>
+</div>
+
+<div class="check" data-answer="5">
+  <p class="check-q">2. 添字 <code>left = 3</code> から <code>right = 7</code> まで（両端を含む）。要素はいくつあるか？</p>
+  <input class="check-in" type="text" placeholder="個数を半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">3, 4, 5, 6, 7 の5個。<code>right - left + 1</code> = 7 - 3 + 1 = 5。
+  <strong>+1 が要るのは、両端の両方を含むから。</strong>引き算だけだと「間の隙間の数」になり、端が1つ落ちます。</p>
+</div>
+
+<div class="check" data-answer="3" data-alt="0,1,2|012">
+  <p class="check-q">3. <code>range(3)</code> が生成する値をすべて書くと、いくつの値になるか？</p>
+  <input class="check-in" type="text" placeholder="個数を半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">0, 1, 2 の3個。<code>range(n)</code> は <strong>0 から始まり n を含まない</strong>ので、ちょうど n 個。
+  ここが前回 <code>range(k+1)</code> で k+1 個を足してしまった事故の発生源です。</p>
+</div>
+
+<div class="check" data-answer="k" data-alt="range(k)">
+  <p class="check-q">4. <code>nums</code> の先頭から k 個ぶんの合計を <code>for i in range(?)</code> で取りたい。<code>?</code> に入るのは？</p>
+  <input class="check-in" type="text" placeholder="? に入る式">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><code>range(k)</code>。k 個ほしいなら <code>range(k)</code>。
+  設問3で確認したとおり <code>range(k)</code> はちょうど k 個です。<code>k+1</code> にすると1個多い。
+  <strong>「k 個ほしい → range(k)」</strong>を、考えずに出せる形にしておくこと。</p>
+</div>
+
+<div class="check" data-answer="4">
+  <p class="check-q">5. <code>nums</code> の長さが6、<code>k = 3</code>。窓の左端が取りうる値はいくつあるか？</p>
+  <input class="check-in" type="text" placeholder="個数を半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">左端は 0, 1, 2, 3 の4通り（左端が3のとき窓は添字3,4,5 でちょうど末尾）。
+  6 - 3 + 1 = 4。設問1と同じ式です。<strong>窓の個数 = 左端の候補数</strong>だから当然一致します。</p>
+</div>
+
+<div class="check" data-answer="right-k+1" data-alt="right - k + 1">
+  <p class="check-q">6. 長さ k の窓の右端が <code>right</code> のとき、左端の添字を <code>right</code> と <code>k</code> で表すと？</p>
+  <input class="check-in" type="text" placeholder="式を入力">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><code>right - k + 1</code>。設問2の「個数 = right - left + 1」を <code>left</code> について解いた形です。
+  検算：<code>right = 4</code>, <code>k = 2</code> なら左端は 3。窓は添字3,4 で2個。合っています。</p>
+</div>
+
+<h2>穴埋め：Maximum Average Subarray I</h2>
+
+<p>
+道具を持った状態で、前回できなかった問題に戻ります。<strong>アルゴリズムはもう埋めてあります。</strong>
+空欄はすべて境界です。今日鍛えたところだけを問うています。
+</p>
+
+<pre><code>class Solution:
+    def findMaxAverage(self, nums: List[int], k: int) -> float:
+        # 1) 最初の窓（先頭 k 個）を合計する
+        window_sum = 0
+        for i in range(____A____):
+            window_sum += nums[i]
+
+        best = window_sum
+
+        # 2) 窓を1つずつ右にずらす。right は「新しく入ってくる要素」の添字
+        for right in range(____B____, len(nums)):
+            window_sum += nums[right]           # 入ってくる1個
+            window_sum -= nums[____C____]       # 出ていく1個
+            best = max(best, window_sum)
+
+        return best / k</code></pre>
+
+<div class="check" data-answer="k">
+  <p class="check-q">空欄 A</p>
+  <input class="check-in" type="text" placeholder="A に入る式">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><code>k</code>。ドリル4と同じです。k 個ほしいなら <code>range(k)</code>。</p>
+</div>
+
+<div class="check" data-answer="k">
+  <p class="check-q">空欄 B（<code>right</code> の開始値）</p>
+  <input class="check-in" type="text" placeholder="B に入る式">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><code>k</code>。最初の窓は添字 0〜k-1 を使い切っています。
+  次に<strong>新しく</strong>入ってくるのは添字 k。検算：k=2 なら初期窓は 0,1、次は 2。合っています。</p>
+</div>
+
+<div class="check" data-answer="right-k" data-alt="right - k">
+  <p class="check-q">空欄 C（出ていく要素の添字）</p>
+  <input class="check-in" type="text" placeholder="C に入る式">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  <code>right - k</code>。ここが今日いちばん間違えやすい箇所です。<br>
+  ドリル6で「窓の左端は <code>right - k + 1</code>」を出しました。左端は<strong>窓の中に残る</strong>要素。
+  出ていくのはその1つ手前、つまり <code>right - k</code> です。<br>
+  検算：k=2, right=2 のとき、新しい窓は添字 1,2。出ていくのは添字 0。<code>2 - 2 = 0</code>。合っています。<br>
+  <strong>ここで <code>right - k + 1</code> と書くのが典型的なオフバイワン</strong>で、まだ窓に残っている要素を引いてしまいます。</p>
+</div>
+
+<div class="aside">
+  <span class="label">前回の詰まりの正体</span>
+  <p>
+  <code>nums[left]</code> と書いてしまった、という記録が残っています。
+  <code>left</code> を「窓の左端」として管理していると、<strong>引くべきなのは left ではなく left の1つ前</strong>という
+  ねじれが起きます。上のコードのように <code>right</code> だけで書くと変数が1本減り、ずれる余地も減ります。
+  <strong>固定長の窓は、変数を right 1本にする。</strong>これは覚える価値のある型です。
+  </p>
+</div>
+
+<h2>今日の課題</h2>
+
+<p>
+穴埋めは補助輪です。外して走れて初めて技能になります。
+</p>
+
+<ol>
+  <li>
+    <strong><a href="https://leetcode.com/problems/maximum-average-subarray-i/">643. Maximum Average Subarray I</a> を白紙から書く。</strong>
+    上のコードは見ないでください。書き終えて<strong>提出する前に</strong>、<code>nums=[1,2,3]</code>, <code>k=2</code> を代入して
+    手で追い、答えが 2.5 になることを確認してから提出すること。
+  </li>
+  <li>
+    <strong><a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/">3. Longest Substring Without Repeating Characters</a>（可変長窓）に進む。</strong>
+    <a href="../reference/sliding-window-template.html">テンプレート</a>を見ながらで構いません。
+    ここでも窓の長さを出す瞬間に、必ず代入検算を挟むこと。
+  </li>
+</ol>
+
+<p>
+1問目は<a href="../reference/interview-protocol.html">面接プロトコル</a>の
+<strong>②素朴解を声に出す</strong>と<strong>⑥計算量を総括する</strong>を必ず実施してください。
+前回、あなたの発話が曖昧だった箇所とバグの位置が一致しました。②はバグ検出器として実際に機能しています。
+</p>
+
+<div class="aside">
+  <span class="label">今日の Python の地雷</span>
+  <p>
+  <code>range(a, b, -1)</code> は <strong>a から始まり b を含まずに減る</strong>。
+  <code>range(len(nums), 0, -1)</code> は <code>len(nums)</code> から始まるので初回で <code>IndexError</code>、
+  さらに 0 を含まないので先頭要素に到達しません。逆順は <code>range(len(nums) - 1, -1, -1)</code>。
+  ここも代入検算：<code>len=3</code> なら 2, 1, 0。正しい。
+  <a href="../reference/boundary-checklist.html">境界の検算チェックリスト</a>に対応表を置きました。
+  </p>
+</div>
+
+<h2>読むもの</h2>
+
+<p>
+<a href="https://www.techinterviewhandbook.org/algorithms/array/">Tech Interview Handbook — Array</a>。
+配列問題のコーナーケース一覧（空配列、要素1個、k が配列長と等しい）が簡潔にまとまっています。
+今日の代入検算と組み合わせると、提出前チェックの型が完成します。<strong>5分で読めます。</strong>
+</p>
+
+<div class="footer">
+  <p>
+    関連：<a href="0002-sliding-window.html">Lesson 02 — sliding window</a> ·
+    <a href="../reference/sliding-window-template.html">sliding window テンプレート</a> ·
+    <a href="../reference/glossary.html">用語集</a> ·
+    <a href="../reference/interview-protocol.html">面接プロトコル</a>
+  </p>
+  <p>
+    <strong>詰まったら質問してください。</strong>答えを出せなくても構いません。
+    「ここまでは分かるが、この一歩が出ない」と言ってもらえれば、そこだけを一緒に潰します。
+  </p>
+</div>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

@@ -164,6 +164,55 @@ th { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; let
 }
 .quiz-fb.show { display: block; }
 
+/* --- 記述式チェッカー（assets/input-check.js が使用） --- */
+.check {
+  margin: 1.6rem 0;
+  padding: 1rem 1.2rem;
+  background: var(--code-bg);
+  border-radius: 5px;
+  border-left: 3px solid var(--rule);
+}
+.check.is-ok { border-left-color: var(--ok); }
+.check.is-ng { border-left-color: var(--ng); }
+.check-q { font-weight: 600; margin-bottom: .7rem; }
+.check-q code { background: var(--bg); }
+.check-in {
+  font-family: var(--mono);
+  font-size: .88rem;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: .45rem .6rem;
+  width: 14rem;
+  max-width: 100%;
+}
+.check-in:focus { outline: none; border-color: var(--accent); }
+.check.is-ok .check-in { border-color: var(--ok); opacity: 1; }
+.check.is-ng .check-in { border-color: var(--ng); }
+.check-btn {
+  font-family: inherit;
+  font-size: .88rem;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: .45rem .9rem;
+  margin-left: .4rem;
+  cursor: pointer;
+}
+.check-btn:hover:not([disabled]) { border-color: var(--accent); }
+.check-btn[disabled] { cursor: default; opacity: .5; }
+.check-fb {
+  font-size: .88rem;
+  color: var(--muted);
+  margin: .7rem 0 0;
+  padding-left: .85rem;
+  border-left: 2px solid var(--rule);
+  display: none;
+}
+.check-fb.show { display: block; }
+
 /* --- フッター --- */
 .footer {
   margin-top: 4rem;
@@ -179,6 +228,7 @@ th { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; let
   :root { --bg: #fff; --fg: #000; --code-bg: #f4f4f4; }
   body { font-size: 11pt; padding: 0; max-width: none; }
   .quiz-opt { break-inside: avoid; }
-  .quiz-fb { display: block; }
+  .quiz-fb, .check-fb { display: block; }
+  .check { break-inside: avoid; }
   h2 { break-after: avoid; }
 }

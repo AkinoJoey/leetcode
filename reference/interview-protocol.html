@@ -127,6 +127,142 @@
 
 <p>用語の定義は <a href="./glossary.html">用語集</a>（「単調」「償却論法」など）。</p>
 
+<h2>練習時の記録フォーマット（〜2026年8月まで）</h2>
+
+<p>
+LeetCode に提出するコードの冒頭に、②③⑥を残す。<strong>順序を守ること。</strong>
+</p>
+
+<ol>
+  <li><strong>まず口に出す</strong>（30秒。書かない）</li>
+  <li><strong>口に出せた内容だけを</strong>書き写す。<em>言えなかったことを補って書かない</em></li>
+</ol>
+
+<p>関数の直下に docstring（<code>"""</code>）で置く。複数行なので <code>#</code> より書きやすい。</p>
+
+<pre><code>class Solution:
+    def characterReplacement(self, s: str, k: int) -&gt; int:
+        """
+        valid とは: k回以下の置き換えで、窓を全部同じ文字にできる
+
+        ② 素朴解（口頭で言えたことだけ）:
+            やり方: 全ての部分文字列を取り出して、それぞれ「長さ - 最頻文字数 &lt;= k」を判定
+            計算量: O(n^2)
+            何の再計算を避けたか: 一文字伸ばすたびに全部数え直している。
+                                  重なっている部分は数え直さなくてよい
+
+        ③ 捨ててよい理由（two pointers など、探索範囲を狭める型のみ）:
+            —
+
+        ⑥ 計算量:
+            [時間1] 外側は何回回るか: n回
+            [時間2] 各反復で必ず走る処理のコスト: O(26)  ← max(counter.values())
+            [時間3] 回るとは限らない内側ループ（償却）: 全体で n回  ← while
+            → 時間: O(n)
+
+            [空間1] 状態は何か: counter
+            [空間2] 入りうる最大の要素数は: 26 (A-Z)
+            [空間3] 入力サイズに依存するか: しない
+            → 空間: O(1)
+
+        ⚠ いちばん自信のない行: while (right - left + 1) - max(counter.values()) &gt; k
+        """</code></pre>
+
+<div class="aside">
+  <span class="label">枠の使い分け</span>
+  <ul>
+    <li><strong>[時間2] と [時間3] を混ぜない。</strong>[時間2] は<em>毎回必ず</em>走る処理、
+        [時間3] は<em>回るとは限らない</em>内側ループ（償却で数える）。424 には両方ある。</li>
+    <li><strong>③は該当する型のときだけ</strong>書く。sliding window では <code>—</code> でよい。</li>
+    <li><strong>使わない枠も消さない。</strong><code>—</code> と書く。枠が空いていること自体が
+        「検討した上で不要と判断した」という記録になる。</li>
+  </ul>
+</div>
+
+<p>
+<strong><code>⚠</code> に「なし」は書かない。</strong>自分で気づけない誤りは、定義上そこに書けない
+（結論 O(n) は正しいのに根拠が誤っていた事例＝LR-0006）。
+自信があっても、相対的にいちばん弱い行を必ず1つ挙げる。<strong>ゼロにできない形式にする。</strong>
+</p>
+
+<div class="aside">
+  <span class="label">なぜ「口に出してから書く」なのか</span>
+  <p>
+  書くと必ず推敲が入り、曖昧さが消える。しかし②の効き目は<strong>曖昧なまま出てくること</strong>にある
+  —— 発話が曖昧だった箇所と実装バグの位置は一致した（LR-0004）。整えて書くと、この検出器が死ぬ。
+  </p>
+  <p>
+  <code>⚠ いちばん自信のない行</code> が最も価値が高い。ここが次のレッスンの題材になる。
+  </p>
+</div>
+
+<p>
+<strong>これは補助輪。</strong>模擬面接（8月下旬）以降、②のコメントは外して全て口頭に戻す。
+⑥は本番でもコードに添えてよいので残す。
+</p>
+
+<h2>②⑥ の採点基準（rubric）</h2>
+
+<p>自由記述にしない。<strong>要素が欠けていないかを毎回この表で確認する。</strong></p>
+
+<table>
+  <thead><tr><th>項目</th><th>言うべき要素</th><th>例（424）</th></tr></thead>
+  <tbody>
+    <tr>
+      <td rowspan="3">時間</td>
+      <td>[時間1] 外側が何回回るか</td>
+      <td>n 回</td>
+    </tr>
+    <tr>
+      <td>[時間2] 外側の<strong>各反復で必ず走る</strong>処理のコスト（定数なら定数と明言）</td>
+      <td><code>max(counter.values())</code> は毎回走る。最大26回＝<strong>定数</strong></td>
+    </tr>
+    <tr>
+      <td>[時間3] <strong>回るとは限らない</strong>内側ループ（＝償却で数える部分）</td>
+      <td><code>while</code> は毎回回るとは限らない。<strong>全体で合計 2n 回</strong>（→ <a href="../lessons/0004-amortized-argument.html">3文テンプレート</a>）</td>
+    </tr>
+    <tr>
+      <td rowspan="3">空間</td>
+      <td>状態は何か</td>
+      <td><code>counter</code></td>
+    </tr>
+    <tr>
+      <td>入りうる最大要素数は</td>
+      <td>文字種、最大26</td>
+    </tr>
+    <tr>
+      <td>入力サイズに依存するか</td>
+      <td>しない → <strong>O(1)</strong></td>
+    </tr>
+    <tr>
+      <td>素朴解</td>
+      <td><strong>「何を全部試すか」</strong>を必ず含める。問題文の言い換えは素朴解ではない</td>
+      <td>全部分文字列 O(n²) × 判定 O(26)</td>
+    </tr>
+    <tr>
+      <td>ボトルネック</td>
+      <td><strong>「何の<em>再計算</em>を避けたか」</strong>。手法名を言い換えて「無駄」と呼ぶのは不可</td>
+      <td>窓が1つずれても変わるのは端の1〜2個だけ。素朴解は<strong>重なった部分を数え直している</strong></td>
+    </tr>
+    <tr>
+      <td>③ 捨ててよい理由<br><span style="font-weight:400">（two pointers / 探索範囲を狭める型）</span></td>
+      <td>捨てた候補に、より良い答えが<strong>残っていない</strong>ことを一文で</td>
+      <td>167: <code>left</code> は最大の相手と組んでも target に届かない → 誰と組んでも届かない</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="aside">
+  <span class="label">よくある減点</span>
+  <ul>
+    <li><strong>内側のコストを黙る。</strong>結論が O(n) でも、気づいて落としたのか気づいていないのかを見られている。</li>
+    <li><strong><code>min</code> の誤用。</strong><code>O(min(a, b))</code> は<strong>上限が2つあるとき</strong>だけ。
+        上限が1つなら <code>min</code> は不要（問題3は必要、424 は不要）。</li>
+    <li><strong>素朴解に主役が出てこない。</strong>最適解の主要な量（424 なら <code>max_freq</code>）が
+        素朴解に登場しないなら、素朴解が間違っている。</li>
+  </ul>
+</div>
+
 <h2>言ってはいけないこと / 言うべきこと</h2>
 
 <table>

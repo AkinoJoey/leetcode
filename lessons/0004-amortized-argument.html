@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 04 — 二重ループなのに O(n) である理由</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 04 · 計算量の説明</p>
+<h1>二重ループなのに O(n) である理由</h1>
+<p class="subtitle">答えが合っていても、根拠が違えば面接では落ちる。</p>
+
+<h2>まず、あなたのコードは正しい</h2>
+
+<p>
+3（Longest Substring）の実装に問題はありません。境界も正確でした。
+<code>right - left + 1</code>、<code>while</code> で縮める構造、どちらも正しい。
+そして<strong>オフバイワンは今回ゼロ</strong>です。前回の投資はここで回収できました。
+</p>
+
+<p>問題は⑥のコメント、その1行だけです。</p>
+
+<blockquote>
+  根拠: left も right も戻らないので各要素は最大<strong>1回</strong>しか触られない
+</blockquote>
+
+<p>
+<strong>結論の O(n) は正しい。根拠が違います。</strong><br>
+そして、あなたはこれを <code>⚠ 言えなかったこと: なし</code> と書きました。つまり、
+<strong>間違っていることに気づかないまま、自信を持って書いた。</strong>
+今日はこの1行を潰します。
+</p>
+
+<div class="aside">
+  <span class="label">なぜこれが致命的か</span>
+  <p>
+  面接で「O(n) です」と言えば、面接官はほぼ確実に「なぜですか？ 二重ループに見えますが」と踏み込みます。
+  ここは<strong>踏み込まれる前提の場所</strong>です。そこで「1回しか触られない」と答えると、
+  コードが正しくても<strong>理解が浅いと判定されます</strong>。
+  答えを暗記している人と、理解している人を切り分ける定番の質問だからです。
+  </p>
+</div>
+
+<h2>数える：<code>s = "abba"</code></h2>
+
+<p>
+推論しないで数えます。<a href="0003-counting-boundaries.html">前回</a>と同じ手続きです。<br>
+「触る」＝ <code>seen</code> に<strong>追加する</strong>か、<code>seen</code> から<strong>取り除く</strong>か。
+</p>
+
+<table>
+  <tr><th>right</th><th>文字</th><th>while 内の動作</th><th>追加</th><th>seen</th></tr>
+  <tr><td>0</td><td>a</td><td>—</td><td><code>a</code> を追加</td><td>{a}</td></tr>
+  <tr><td>1</td><td>b</td><td>—</td><td><code>b</code> を追加</td><td>{a,b}</td></tr>
+  <tr><td>2</td><td>b</td><td><code>a</code> を除去 → <code>b</code> を除去</td><td><code>b</code> を追加</td><td>{b}</td></tr>
+  <tr><td>3</td><td>a</td><td>—</td><td><code>a</code> を追加</td><td>{b,a}</td></tr>
+</table>
+
+<p>各文字が何回触られたか、実際に数えてください。</p>
+
+<div class="check" data-answer="2">
+  <p class="check-q">1. 添字1の <code>b</code> は、追加と除去で合計何回触られたか？</p>
+  <input class="check-in" type="text" placeholder="回数を半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">2回。<code>right=1</code> で追加され、<code>right=2</code> の while で除去された。
+  <strong>入るとき1回、出るとき1回。</strong>これが上限です。</p>
+</div>
+
+<div class="check" data-answer="2">
+  <p class="check-q">2. どの文字も、触られる回数の上限はいくつか？</p>
+  <input class="check-in" type="text" placeholder="回数を半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  2回。<strong>入るのは1回だけ</strong>（<code>right</code> がその添字を通るのは1度きり。<code>right</code> は戻らない）。
+  <strong>出るのも1回だけ</strong>（<code>left</code> がその添字を通るのは1度きり。<code>left</code> も戻らない）。
+  合わせて2回が上限です。</p>
+</div>
+
+<div class="check" data-answer="2n" data-alt="2*n|2n回|2×n">
+  <p class="check-q">3. 長さ n の文字列全体で、while ループの実行回数は最大いくつか？（n を使った式）</p>
+  <input class="check-in" type="text" placeholder="n を使った式">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  除去は各文字1回まで＝最大 n 回。追加も最大 n 回。合わせて <strong>2n</strong>。
+  定数倍は落とすので <strong>O(n)</strong>。<br>
+  重要なのは、<code>while</code> が<strong>1回の外側ループで何回回るか</strong>を見ないことです。
+  ある反復では2回回り、別の反復では0回。<strong>個別に見ると上限が決まらない。</strong>
+  全体で合計するから n に収まる。</p>
+</div>
+
+<h2>これが「償却論法」</h2>
+
+<div class="aside">
+  <span class="label">用語</span>
+  <p>
+  <strong>償却論法（amortized analysis）</strong>：1回あたりの最悪コストではなく、
+  <strong>全体の合計コストを回数で割って</strong>評価する考え方。<br>
+  「1回の <code>while</code> は最悪 n 回回るから O(n²)」は個別評価。
+  「<code>while</code> は全体で合計 n 回しか回らないから O(n)」が償却評価。<br>
+  <a href="../reference/glossary.html">用語集</a>にも収録。
+  </p>
+</div>
+
+<p>
+なぜ個別評価では過大になるのか。<strong>while が長く回るには、その前にたくさん追加されている必要があるから</strong>です。
+一度に10回除去できるなら、それ以前に10回追加している。除去は追加の「後払い」でしかなく、
+追加の総数（n 回）を超えられません。
+</p>
+
+<h2>面接で言う形（3文テンプレート）</h2>
+
+<p>
+この3文を、順番どおり口に出せるようにしてください。<strong>丸暗記ではなく、上で数えた結果の要約です。</strong>
+</p>
+
+<blockquote>
+  <p>① 二重ループに見えますが、<code>left</code> も <code>right</code> も<strong>戻りません</strong>。</p>
+  <p>② そのため各要素は、集合に<strong>入るときと出るときの最大2回</strong>しか触られません。</p>
+  <p>③ 全体で最大 2n 回の操作なので、時間は <strong>O(n)</strong> です。</p>
+</blockquote>
+
+<p>
+この型は sliding window だけのものではありません。<strong>two pointers、単調スタックでもそのまま使えます</strong>。
+今後「ポインタが戻らない」構造を見たら、いつでもこの3文です。
+</p>
+
+<div class="check" data-answer="2" data-alt="二">
+  <p class="check-q">4. 単調スタック（各要素は push 1回・pop 1回まで）。各要素が触られる上限は何回か？</p>
+  <input class="check-in" type="text" placeholder="回数を半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">2回。まったく同じ論法です。push で1回、pop で1回。だから全体 O(n)。
+  <strong>この型はあと何度も再会します。</strong>今のうちに3文を口に馴染ませておくと、以降ずっと使い回せます。</p>
+</div>
+
+<h2>ついでに：空間計算量をもう一段だけ正確に</h2>
+
+<p>
+あなたは <code>空間 O(n)</code> と書きました。間違いではありません。ただ、面接で差がつくのはこの先です。
+</p>
+
+<p>
+<code>seen</code> に入るのは<strong>相異なる文字だけ</strong>です。だから大きさの上限は2つある。
+文字列の長さ <code>n</code> と、<strong>文字種の数</strong>。小さいほうで頭打ちになります。
+</p>
+
+<blockquote>
+  空間は <strong>O(min(n, 文字種))</strong> です。入力が ASCII に限られるなら文字種は128なので、
+  実質 <strong>O(1)</strong> とも言えます。
+</blockquote>
+
+<p>
+「入力の制約を確認して、それを計算量に反映した」という動きそのものが評価されます。
+<strong>制約を読んでいる人だと示せる。</strong>
+</p>
+
+<h2>今日の課題</h2>
+
+<ol>
+  <li>
+    <strong><a href="https://leetcode.com/problems/longest-repeating-character-replacement/">424. Longest Repeating Character Replacement</a> を解く。</strong>
+    可変長窓の2問目。今度は<strong>テンプレートを開く前に、まず10分だけ自力で</strong>試してください。
+    詰まったら開いて構いません（開いたことは正直に書いてください）。
+  </li>
+  <li>
+    提出前に<strong>3文テンプレートを声に出す。</strong>この問題でも「各要素は最大2回」がそのまま成立します。
+  </li>
+</ol>
+
+<div class="aside">
+  <span class="label">記録フォーマットの変更</span>
+  <p>
+  <code>⚠ 言えなかったこと</code> は <strong>「なし」を禁止</strong>します。今回、根拠が誤っていたのに「なし」と書きました。
+  自分で気づけない誤りは、定義上そこに書けないからです。<br>
+  代わりに <strong><code>⚠ いちばん自信のない行:</code></strong> に変更します。必ず1つ挙げてください。
+  自信があっても、相対的に一番弱い行を選ぶ。<strong>ゼロにはできない形式にします。</strong>
+  </p>
+</div>
+
+<h2>読むもの</h2>
+
+<p>
+<a href="https://www.geeksforgeeks.org/dsa/introduction-to-amortized-analysis/">GeeksforGeeks — Introduction to Amortized Analysis</a>。
+動的配列のリサイズを例に、償却の考え方を説明しています。
+今日の「入るとき1回・出るとき1回」と同じ論法が、別の題材で出てくる形です。
+<strong>別の文脈で同じ型に再会すると、定着が一段深まります。</strong>
+</p>
+
+<div class="footer">
+  <p>
+    関連：<a href="0003-counting-boundaries.html">Lesson 03 — 境界は推論しない</a> ·
+    <a href="0002-sliding-window.html">Lesson 02 — sliding window</a> ·
+    <a href="../reference/sliding-window-template.html">テンプレート</a> ·
+    <a href="../reference/glossary.html">用語集</a> ·
+    <a href="../reference/interview-protocol.html">面接プロトコル</a>
+  </p>
+  <p>
+    <strong>詰まったら質問してください。</strong>特に「3文の②がなぜ2回なのか腑に落ちない」なら、
+    そこは絶対に流さないでください。今後ずっと使う型です。
+  </p>
+</div>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

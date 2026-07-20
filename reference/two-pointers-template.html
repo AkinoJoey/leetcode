@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference — Two Pointers テンプレート</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Reference · 引くための資料</p>
+<h1>Two Pointers テンプレート</h1>
+<p class="subtitle">両端から挟み撃つ型。sliding window の兄弟。</p>
+
+<h2>1. 見分ける</h2>
+
+<table>
+  <thead><tr><th>問題文の合図</th><th>選ぶ型</th></tr></thead>
+  <tbody>
+    <tr><td><strong>ソート済み</strong>配列から、条件を満たす<strong>ペア</strong></td><td>Two Pointers（両端から）</td></tr>
+    <tr><td>「連続する」部分配列の最長・最短</td><td><a href="./sliding-window-template.html">Sliding Window</a></td></tr>
+    <tr><td>回文（前後から対称に見る）</td><td>Two Pointers（両端から）</td></tr>
+    <tr><td>ソートされていない＋ペア</td><td>Hash（<a href="./python-hash-cheatsheet.html">→ チートシート</a>）</td></tr>
+  </tbody>
+</table>
+
+<p>
+<strong>決定打は「ソート済み」または「対称性」。</strong>
+ソートされていないのにペアを探すなら、まず Hash を疑う（Two Sum は Hash、Two Sum II は Two Pointers）。
+</p>
+
+<h2>2. 骨格</h2>
+
+<pre><code>left, right = 0, len(arr) - 1
+
+while left &lt; right:
+    if 条件を満たす:
+        return ...
+    elif 小さすぎる:
+        left += 1        # 大きくしたい
+    else:
+        right -= 1       # 小さくしたい</code></pre>
+
+<div class="aside">
+  <span class="label">境界</span>
+  <p>
+  <code>while left &lt; right</code>（<code>&lt;=</code> ではない）。ペアを探すので同じ要素を2回使わない。<br>
+  回文判定など「中央の1文字は見なくてよい」場合も <code>&lt;</code> でよい。
+  迷ったら代入検算 → <a href="./boundary-checklist.html">境界チェックリスト</a>。
+  </p>
+</div>
+
+<h2>3. 「どちらを動かすか」の導き方 ← この型の本体</h2>
+
+<p>
+骨格は毎回同じ。問題ごとに違うのは<strong>動かす方向の決め方</strong>と、
+<strong>捨てた候補を二度と見なくてよい理由</strong>だけ。ここも3段で出す。
+</p>
+
+<ol>
+  <li><strong>いま持っている値</strong>を書く（和、面積、距離など）</li>
+  <li><strong>どちらを動かすと目的の方向に動くか</strong>を、ソート順から言う</li>
+  <li><strong>捨てる側に、より良い答えが残っていないこと</strong>を一文で言う ← 面接で聞かれるのはここ</li>
+</ol>
+
+<table>
+  <thead><tr><th>問題</th><th>①いまの値</th><th>②動かす基準</th><th>③捨ててよい理由</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>167. Two Sum II</td>
+      <td><code>arr[left] + arr[right]</code></td>
+      <td>和が小さすぎる → <code>left += 1</code></td>
+      <td>ソート済みなので、<code>arr[left]</code> はどの相手と組んでも和が足りない</td>
+    </tr>
+    <tr>
+      <td>125. Valid Palindrome</td>
+      <td>両端の文字</td>
+      <td>一致したら両方内側へ</td>
+      <td>対称性より、外側の対は二度と関係しない</td>
+    </tr>
+    <tr>
+      <td>11. Container With Most Water</td>
+      <td><code>min(h[l], h[r]) × (r - l)</code></td>
+      <td>低いほうを内側へ</td>
+      <td>低い柱を残しても幅が減るだけ。面積は絶対に増えない</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="aside">
+  <p><strong>③を言えないまま実装すると、正しくても「なぜ動くか説明できない解」になる。</strong>
+  面接官が最も踏み込むのがここ。<a href="./interview-protocol.html">プロトコル</a>の③で口に出す。</p>
+</div>
+
+<h2>4. 計算量</h2>
+
+<p>
+<strong>O(n)</strong>。3文テンプレート（<a href="../lessons/0004-amortized-argument.html">Lesson 04</a>）が
+そのまま使える —— <code>left</code> は増えるだけ、<code>right</code> は減るだけ。
+<strong>各要素は最大2回しか触られない。</strong>合計 2n で O(n)。
+</p>
+
+<p>空間は追加の状態を持たなければ <strong>O(1)</strong>。ソートが必要なら <strong>O(n log n)</strong> が支配的になる。</p>
+
+<h2>5. Python の地雷</h2>
+
+<ul>
+  <li><code>while left &lt; right</code> を <code>&lt;=</code> にすると、同じ要素を2回使ったペアを返す。</li>
+  <li><strong>1-indexed の問題がある。</strong>167 は答えを <code>[left+1, right+1]</code> で返す。問題文を読むこと。</li>
+  <li>重複をスキップする問題（15. 3Sum）では
+      <code>while left &lt; right and arr[left] == arr[left-1]: left += 1</code> の境界に注意。</li>
+  <li>「ソート済み」と書いていないのに two pointers を使うなら、<strong>自分でソートした計算量を計上する。</strong></li>
+</ul>
+
+<div class="footer">
+  <p>関連：<a href="../lessons/0007-two-pointers.html">Lesson 07</a> ·
+     <a href="./sliding-window-template.html">Sliding Window テンプレート</a> ·
+     <a href="./interview-protocol.html">面接プロトコル</a></p>
+  <p>裏取り：<a href="https://www.techinterviewhandbook.org/algorithms/array/">Tech Interview Handbook — Array</a></p>
+</div>
+
+</body>
+</html>

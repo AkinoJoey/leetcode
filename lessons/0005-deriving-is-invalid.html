@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 05 — is_invalid を自分で導く</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 05 · 可変長ウィンドウ</p>
+<h1><code>is_invalid</code> を自分で導く</h1>
+<p class="subtitle">テンプレートが隠していた、唯一の難所。</p>
+
+<h2>先に謝ります。テンプレートが悪い</h2>
+
+<p>
+私が渡した可変長ウィンドウのテンプレートは、こう書いてありました。
+</p>
+
+<pre><code>while is_invalid(state):
+    remove(state, s[left])
+    left += 1</code></pre>
+
+<p>
+<strong><code>is_invalid</code> は関数名であって、答えではありません。</strong>
+そして 424 において、難しいのは<strong>そこだけ</strong>です。
+私は問題の唯一の難所を、それらしい名前で包んで隠していました。解けなくて当然です。
+</p>
+
+<p>
+なぜこれまで露呈しなかったか。3（Longest Substring）では <code>is_invalid</code> が
+問題文にほぼ直書きされていたからです。「重複がある」→ <code>char in seen</code>。翻訳がいらない。<br>
+424 は初めて<strong>導出</strong>が必要になった問題です。階段が一段上がっています。
+</p>
+
+<h2>あなたが書けていたもの</h2>
+
+<p>これは重要なので先に確認します。以下は<strong>全部正しい</strong>。</p>
+
+<ul>
+  <li><code>for right, char in enumerate(s)</code> — 骨格</li>
+  <li><code>while ... : left += 1</code> — 縮める構造</li>
+  <li><code>right - left + 1</code> — 境界（今回も正確）</li>
+  <li><code>defaultdict(int)</code> — 状態の選択</li>
+</ul>
+
+<p>
+<strong>構造は全部書けていて、条件式だけが書けなかった。</strong>
+詰まりが1点に絞れているのは良い状態です。今日はその1点だけをやります。
+</p>
+
+<h2>手順：日本語 → 量 → 不等号</h2>
+
+<p>
+<code>is_invalid</code> は、ひらめきで出すものではありません。<strong>3段階の翻訳</strong>で出します。
+</p>
+
+<h3>① 問題文から「valid とは何か」を日本語一文で書く</h3>
+
+<blockquote>この窓は、<strong>k 回以下の置き換えで、全部同じ文字にできる</strong></blockquote>
+
+<p>これは問題文の直訳です。考えていません。<strong>写しているだけ</strong>です。</p>
+
+<h3>② その一文を、窓の中で数えられる量に翻訳する</h3>
+
+<p>
+「全部同じ文字にする」なら、<strong>どの文字に揃えるのが得か</strong>。
+当然、いま窓の中にいちばん多くある文字です。それ以外を全部置き換えることになる。
+</p>
+
+<blockquote>置き換えが必要な個数 ＝ <strong>窓の長さ − 窓の中で最も多い文字の個数</strong></blockquote>
+
+<h3>③ 不等号にする</h3>
+
+<pre><code>valid   ⟺  (right - left + 1) - max_freq &lt;= k
+invalid ⟺  (right - left + 1) - max_freq &gt;  k</code></pre>
+
+<p>これで <code>is_invalid</code> が埋まりました。<strong>ひらめきは一度も使っていません。</strong></p>
+
+<h2>数える</h2>
+
+<p><code>s = "AABABBA"</code>、<code>k = 1</code>。窓が <code>"AABAB"</code>（添字0〜4）のときを考えます。</p>
+
+<div class="check" data-answer="5">
+  <p class="check-q">1. この窓の長さは？</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">5。<code>right - left + 1</code> = 4 - 0 + 1 = 5。</p>
+</div>
+
+<div class="check" data-answer="3">
+  <p class="check-q">2. 窓 <code>"AABAB"</code> の中で、最も多い文字の個数（max_freq）は？</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">3。A が3個、B が2個。多いほうの A に揃えるのが得です。</p>
+</div>
+
+<div class="check" data-answer="2">
+  <p class="check-q">3. 置き換えが必要な個数は？</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">2。5 - 3 = 2。B を2個とも A に変える必要があります。</p>
+</div>
+
+<div class="check" data-answer="invalid" data-alt="いんばりっど|無効|だめ">
+  <p class="check-q">4. <code>k = 1</code> のとき、この窓は valid か invalid か？（どちらかを英語で）</p>
+  <input class="check-in" type="text" placeholder="valid または invalid">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">invalid。2回の置き換えが必要なのに、許されるのは1回まで。
+  <code>5 - 3 = 2 &gt; 1</code>。だから <code>while</code> が回って窓を縮めます。</p>
+</div>
+
+<div class="check" data-answer="(right-left+1)-max_freq>k" data-alt="right-left+1-max_freq>k|(right - left + 1) - max_freq > k|window_len-max_freq>k">
+  <p class="check-q">5. <code>while</code> の条件（invalid の式）を書いてください</p>
+  <input class="check-in" type="text" placeholder="式を入力">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><code>(right - left + 1) - max_freq &gt; k</code>。
+  <strong>あなたが書いた <code>counter[char] &gt; k</code> は、単に「今の文字が k 個より多い」という意味</strong>で、
+  問題文のどの文とも対応していません。①の日本語を経由しなかったために出た式です。</p>
+</div>
+
+<h2>穴埋め</h2>
+
+<pre><code>class Solution:
+    def characterReplacement(self, s: str, k: int) -&gt; int:
+        counter = defaultdict(int)
+        left = 0
+        max_len = 0
+
+        for right, char in enumerate(s):
+            # 1) 入れる
+            counter[char] += 1
+
+            # 2) invalid な間、縮める
+            while (right - left + 1) - max(counter.values()) &gt; k:
+                counter[____A____] -= 1
+                left += 1
+
+            # 3) ここで窓は必ず valid
+            max_len = max(max_len, right - left + 1)
+
+        return max_len</code></pre>
+
+<div class="check" data-answer="s[left]">
+  <p class="check-q">空欄 A（窓から出ていく文字を減らす）</p>
+  <input class="check-in" type="text" placeholder="A に入る式">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  <code>s[left]</code>。あなたは <code>counter[left]</code> と書きました。<br>
+  <code>left</code> は<strong>添字（数）</strong>、<code>counter</code> のキーは<strong>文字</strong>です。
+  <code>counter[left]</code> は「整数 0 という名前の文字」を数えることになり、エラーも出ずに静かに壊れます。
+  <strong>添字と値の取り違え。</strong>これは新しい種類の事故なので記録しておいてください。</p>
+</div>
+
+<div class="aside">
+  <span class="label">順序が重要</span>
+  <p>
+  あなたのコードは <code>counter[char] += 1</code> が <code>while</code> の<strong>後</strong>にありました。
+  それだと、<strong>今の文字を入れていない状態</strong>で invalid 判定することになります。<br>
+  テンプレートの順は <strong>①入れる → ②縮める → ③更新</strong>。この順序に意味があります
+  —— ③に到達した時点で窓が valid であることを保証するためです（不変条件）。
+  </p>
+</div>
+
+<h2>計算量（3文テンプレートの再演）</h2>
+
+<p>
+<a href="0004-amortized-argument.html">前回</a>の3文をここでも使います。ただし一箇所だけ追加が要ります。
+</p>
+
+<div class="check" data-answer="26" data-alt="文字種|26回">
+  <p class="check-q">6. <code>max(counter.values())</code> は毎回いくつの値を走査するか？（大文字英字のみの制約下で）</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">最大26。<strong>定数</strong>です。だから全体は O(26n) = <strong>O(n)</strong>。
+  面接では「文字種は26で定数なので、計算量には効きません」と一言添えます。
+  <strong>ここを黙って O(n) と言うと突っ込まれます。</strong></p>
+</div>
+
+<div class="aside">
+  <span class="label">発展（今は不要）</span>
+  <p>
+  <code>max_freq</code> を変数で持ち、<strong>減らさない</strong>という有名な高速化があります。
+  面接で聞かれたら「答えは縮まないので max_freq を減らす必要がない」と説明できますが、
+  <strong>今日は上の素直な版で構いません。</strong>説明できない最適化を書くほうが危険です。
+  </p>
+</div>
+
+<h2>今日の課題</h2>
+
+<ol>
+  <li>
+    <strong>424 を白紙から書く。</strong>ただし<strong>コードより先に、①の日本語一文を書いてから</strong>始めること。
+    <code># valid とは: ___</code> というコメントを、必ず最初の行に置いてください。
+  </li>
+  <li>
+    <strong><a href="https://leetcode.com/problems/max-consecutive-ones-iii/">1004. Max Consecutive Ones III</a> を解く。</strong>
+    同じ導出をもう一度やる問題です。<strong>①の日本語一文が出せれば勝ち</strong>で、あとは同じ骨格が動きます。
+  </li>
+</ol>
+
+<p>
+提出時のコメントは <code>⚠ いちばん自信のない行</code> を忘れずに（「なし」は禁止）。
+</p>
+
+<h2>読むもの</h2>
+
+<p>
+<a href="https://www.techinterviewhandbook.org/algorithms/string/">Tech Interview Handbook — String</a>。
+文字列問題で「窓の中の状態として何を持つか」の定石（カウント配列26個、`Counter`、集合）が整理されています。
+<strong>状態の選択</strong>は <code>is_invalid</code> の導出とセットで効いてきます。
+</p>
+
+<div class="footer">
+  <p>
+    関連：<a href="0004-amortized-argument.html">Lesson 04 — 償却論法</a> ·
+    <a href="0002-sliding-window.html">Lesson 02 — sliding window</a> ·
+    <a href="../reference/sliding-window-template.html">テンプレート（is_invalid の節を追記済み）</a> ·
+    <a href="../reference/glossary.html">用語集</a>
+  </p>
+  <p>
+    <strong>解けなかったのは、あなたの問題ではなく資料の問題でした。</strong>
+    同じように「テンプレートのこの部分が具体化できない」と感じたら、すぐ言ってください。
+    そこはたいてい、私が抽象化して隠している場所です。
+  </p>
+</div>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>
