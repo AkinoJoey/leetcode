@@ -55,8 +55,35 @@ sliding window の <code>left</code>（進むか止まるか、戻らない）�
   <p>③ 全体で最大 2n 回の操作なので、時間は <strong>O(n)</strong> です。</p>
 </blockquote>
 <p><strong>「1回」ではなく「2回」。</strong>入るのが1回、出るのが1回。ここを1回と言うと理解の浅さを疑われる。</p>
-<p>two pointers、sliding window、単調スタックで<strong>そのまま使い回せる</strong>。
-詳細は <a href="../lessons/0004-amortized-argument.html">Lesson 04</a>。</p>
+<p>sliding window と単調スタックで<strong>そのまま使い回せる</strong>。
+詳細は <a href="../lessons/0004-amortized-argument.html">Lesson 04</a>。<br>
+<strong>two pointers には使わない</strong>——下の「ギャップ論法」のほうが短い。</p>
+
+<h3>ギャップ論法 <span style="color:var(--muted);font-size:.8em">（本ワークスペース内の呼び名）</span></h3>
+<p><strong>毎反復できっちり減る量を1つ見つけ、開始と終了の差でループ回数を直接数える方法。</strong>
+教科書用語ではないので<strong>面接で名前を出さない</strong>（中身を言う）。
+CS では単調減少量（monovariant）／ポテンシャル関数による議論として知られる標準的な道具。</p>
+<pre><code>量: gap = right - left
+
+(a) 毎反復で必ず、ちょうど 1 減る
+    （left += 1 か right -= 1 の一方が必ず起きる）
+(b) 開始 n-1、終了 0
+
+⇒ 反復回数 = (n-1) - 0 = n-1 回</code></pre>
+<table>
+  <thead><tr><th></th><th>償却論法</th><th>ギャップ論法</th></tr></thead>
+  <tbody>
+    <tr><td>形</td><td>外側ループ＋内側 <code>while</code></td><td>ループが1本だけ</td></tr>
+    <tr><td>1反復で起きること</td><td>内側が0回のときも n 回のときもある</td><td><strong>必ずちょうど1つ</strong></td></tr>
+    <tr><td>数え方</td><td>合計で上限を押さえる（足し算）</td><td>開始 − 終了（引き算）</td></tr>
+    <tr><td>使う型</td><td>sliding window、単調スタック</td><td><strong>two pointers</strong>、二分探索</td></tr>
+  </tbody>
+</table>
+<p><strong><code>⑥[時間1]</code> にそのまま入る数が出る</strong>のが利点。
+「各要素は最大2回」は総<em>操作</em>回数（2n）であって、<em>反復</em>回数ではない点に注意。</p>
+<p>面接での言い方：<em>「<code>right - left</code> は毎反復ちょうど1減り、n-1 から始まって 0 で止まります。
+よってループは高々 n-1 回、時間は O(n) です。」</em><br>
+詳細は <a href="../lessons/0008-counting-the-discard.html">Lesson 08</a>。</p>
 
 <h2>データ構造まわり</h2>
 

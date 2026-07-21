@@ -70,7 +70,7 @@ while left &lt; right:
       <td>167. Two Sum II</td>
       <td><code>arr[left] + arr[right]</code></td>
       <td>和が小さすぎる → <code>left += 1</code></td>
-      <td>ソート済みなので、<code>arr[left]</code> はどの相手と組んでも和が足りない</td>
+      <td><code>arr[left]</code> は<strong>残りで最大の相手と組んでも</strong>届かない。他はもっと小さい</td>
     </tr>
     <tr>
       <td>125. Valid Palindrome</td>
@@ -88,17 +88,71 @@ while left &lt; right:
 </table>
 
 <div class="aside">
+  <span class="label">③の3原則</span>
+  <ol>
+    <li><strong>値を知るのではなく、上限を押さえる。</strong>捨てる要素が他の相手と組んだ結果は
+        <em>計算しない</em>。「どんな相手でもこれを超えない」と言えれば足りる。</li>
+    <li><strong>比較の基準は、すでに計算した値。</strong>③の主張は「捨てた中に良いものがない」ではなく、
+        より弱い「<strong>捨てたものは手元の値を超えられない</strong>」。計算済みのペアは捨てていない。</li>
+    <li><strong>一般形で書く。</strong>「<code>h[0]</code> は…」ではなく「<strong>低いほうの柱</strong>は…」。
+        具体例で書くと<em>どちらを捨てるかという適用条件が文面から消え、コードの分岐に落ちない</em>。</li>
+  </ol>
+</div>
+
+<h3>上限はどこから来るか（ソートは必須ではない）</h3>
+
+<table>
+  <thead><tr><th>問題</th><th>何を押さえるか</th><th>上限の出どころ</th><th>ソート</th></tr></thead>
+  <tbody>
+    <tr><td>167</td><td>他の相手との和</td><td><strong>ソート順</strong>（<code>arr[j] ≤ arr[right]</code>）</td><td>必須</td></tr>
+    <tr><td>11</td><td>面積</td><td><strong><code>min</code> と添字</strong>
+      （水位 <code>min(h[l],h[j]) ≤ h[l]</code>、幅 <code>j-l &lt; r-l</code>）</td><td><strong>不要</strong></td></tr>
+    <tr><td>125</td><td>外側の対の判定</td><td><strong>対称性</strong></td><td>不要</td></tr>
+  </tbody>
+</table>
+
+<p>
+<strong>ソートは③の必須条件ではなく、上限を得る手段のひとつ。</strong>
+11 では <code>h[j]</code> の値を最後まで一度も使わずに③が完成する
+——ソートされていなくても捨てられる。→ <a href="../lessons/0008-counting-the-discard.html">Lesson 08</a>
+</p>
+
+<div class="aside">
   <p><strong>③を言えないまま実装すると、正しくても「なぜ動くか説明できない解」になる。</strong>
-  面接官が最も踏み込むのがここ。<a href="./interview-protocol.html">プロトコル</a>の③で口に出す。</p>
+  面接官が最も踏み込むのがここ。<a href="./interview-protocol.html">プロトコル</a>の③で口に出す。<br>
+  さらに実務上：<strong>③が一般形で書ければ、コードの <code>if</code> の分岐条件はそこから自動的に決まる。</strong>
+  11 で「低いほうを捨てる」が③から落ちると、コードも <code>left += 1</code> 無条件になる（実際に起きた）。</p>
 </div>
 
 <h2>4. 計算量</h2>
 
 <p>
-<strong>O(n)</strong>。3文テンプレート（<a href="../lessons/0004-amortized-argument.html">Lesson 04</a>）が
-そのまま使える —— <code>left</code> は増えるだけ、<code>right</code> は減るだけ。
-<strong>各要素は最大2回しか触られない。</strong>合計 2n で O(n)。
+<strong>O(n)</strong>。償却論法（<a href="../lessons/0004-amortized-argument.html">Lesson 04</a>）は<strong>使わなくてよい</strong>。
+この型には、もっと短くて反論の余地がない数え方がある——<strong>ギャップ論法</strong>。
 </p>
+
+<pre><code><strong>right - left は毎反復ちょうど1減る</strong>
+（left += 1 か right -= 1 の一方が必ず起きるから）
+
+開始 n-1 → 終了 0  ⇒  反復は高々 n-1 回
+
+[時間1] n 回   [時間2] O(1)（加算と比較）   [時間3] -（内側ループなし）</code></pre>
+
+<div class="aside">
+  <span class="label">⚠ log n と書かない</span>
+  <p>
+  「捨てる」という語は二分探索と結びついているが、<strong>計算量を決めるのは捨てる理由ではなく捨てる量</strong>。
+  </p>
+  <table>
+    <thead><tr><th>1回で捨てる候補</th><th>反復回数</th></tr></thead>
+    <tbody>
+      <tr><td>端の1本（Two Pointers）</td><td><strong>n</strong></td></tr>
+      <tr><td>残りの半分（二分探索）</td><td>log n</td></tr>
+    </tbody>
+  </table>
+  <p><strong>log n が出てよいのは、捨てる量が「残りの一定割合」のときだけ。</strong>
+  → <a href="../lessons/0008-counting-the-discard.html">Lesson 08</a></p>
+</div>
 
 <p>空間は追加の状態を持たなければ <strong>O(1)</strong>。ソートが必要なら <strong>O(n log n)</strong> が支配的になる。</p>
 

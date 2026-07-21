@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 08 — 捨てる量を数える</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 08 · Two Pointers</p>
+<h1>捨てる量を数える</h1>
+<p class="subtitle">③と⑥は、同じ「捨てる」の裏表。分けて考えると混線する。</p>
+
+<h2>167 は完答</h2>
+
+<p>
+骨格、境界、1-indexed の <code>[left+1, right+1]</code>、すべて正しい。
+<code>⚠</code> に <code>left &lt; right</code> を挙げたのも的確です——先に答えておきます：
+</p>
+
+<div class="aside">
+  <span class="label"><code>&lt;</code> か <code>&lt;=</code> か</span>
+  <p>
+  <code>&lt;</code> が正しい。<code>&lt;=</code> にすると <code>left == right</code> のとき
+  <code>numbers[left] + numbers[right]</code> が<strong>同じ要素を2回足した和</strong>になり、
+  167 の「同じ要素を2回使ってはいけない」という制約に違反します。<br>
+  <strong>3回連続で、<code>⚠</code> に挙げた行が実際の急所と一致しています。</strong>この感覚は維持してください。
+  </p>
+</div>
+
+<h2>直すのは1点だけ</h2>
+
+<p>提出された⑥のこの行です。</p>
+
+<pre><code>[時間1] 外側は何回回るか: logn回
+→ 時間: O(logn)</code></pre>
+
+<p>
+正しくは <strong>O(n)</strong> です。ただ、ここで言いたいのは訂正ではありません。
+<strong>この誤りには筋が通っている</strong>ので、そこを見ます。
+</p>
+
+<p>
+あなたは③でこう書きました——「大きい小さいを判断することができ、<strong>捨てる</strong>ことが可能」。
+その直後に⑥を書いている。そして<strong>「捨てる」という言葉は、すでに別のアルゴリズムに予約済み</strong>です。
+</p>
+
+<blockquote>
+  二分探索：毎回<strong>半分</strong>捨てる → log n 回
+</blockquote>
+
+<p>
+③で「捨てられる」と論証した勢いのまま、⑥に <code>log n</code> が出てきた。
+<strong>これは前回のレッスンが作った誤概念です</strong>（私が「捨てる」を核心語として立てたので）。
+直し方は、言葉を分解することです。
+</p>
+
+<h2>「捨てる」は2つの問い</h2>
+
+<table>
+  <thead><tr><th></th><th>問い</th><th>答えが決めるもの</th></tr></thead>
+  <tbody>
+    <tr><td><strong>③</strong></td><td>なぜ捨ててよいか</td><td>アルゴリズムの<strong>正しさ</strong></td></tr>
+    <tr><td><strong>⑥</strong></td><td>1回で<strong>どれだけ</strong>捨てたか</td><td>アルゴリズムの<strong>速さ</strong></td></tr>
+  </tbody>
+</table>
+
+<p>
+③がどんなに鮮やかでも、⑥は決まりません。<strong>速さを決めるのは理由ではなく量</strong>です。
+</p>
+
+<table>
+  <thead><tr><th>型</th><th>1回の判定で捨てる候補</th><th>反復回数</th></tr></thead>
+  <tbody>
+    <tr><td>線形探索</td><td>1個</td><td>n</td></tr>
+    <tr><td><strong>Two Pointers</strong></td><td><strong>端の1本</strong></td><td><strong>n</strong></td></tr>
+    <tr><td>二分探索</td><td>残りの<strong>半分</strong></td><td>log n</td></tr>
+  </tbody>
+</table>
+
+<p>
+<strong>log n が出てよいのは、捨てる量が「残りの一定割合」のときだけ</strong>です。
+Two pointers が捨てるのは常に<strong>端の1本</strong>——割合ではなく定数個。だから n 回。
+</p>
+
+<h2>面接で言う版：ギャップを数える</h2>
+
+<p>
+償却論法（<a href="0004-amortized-argument.html">Lesson 04</a>）を持ち出す必要はありません。
+two pointers には、もっと短くて確実な数え方があります。
+</p>
+
+<pre><code>right - left は、毎反復 <strong>ちょうど1</strong> 減る
+（left += 1 か right -= 1 のどちらか一方が必ず起きるから）
+
+開始: n - 1
+終了: 0
+→ 反復は高々 n - 1 回</code></pre>
+
+<p>
+これを <code>[時間1]</code> に書きます。<strong>「最大2回触られる」より、こちらのほうが面接で強い</strong>——
+ループ変数の単調性から反復回数を直接導いており、反論の余地がありません。
+</p>
+
+<h2>手を動かす</h2>
+
+<div class="check" data-answer="1">
+  <p class="check-q">1. <code>numbers=[2,7,11,15]</code>、<code>left=0, right=3</code>。1回反復すると <code>right - left</code> はいくつ減るか？</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">1。どちらのポインタが動いても、ギャップは必ずちょうど1だけ縮みます。
+  <strong>「半分になる」ことは決してありません。</strong>ここが二分探索との分かれ目。</p>
+</div>
+
+<div class="check" data-answer="3">
+  <p class="check-q">2. 同じ入力（<code>n=4</code>）で、ループは最大何回回るか？</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">3回（ギャップ 3 → 2 → 1 → 0）。<code>n - 1</code> 回。
+  <strong>log₂4 = 2 回ではありません。</strong>n が 10⁵ なら、この差は 10⁵ 対 17 です。</p>
+</div>
+
+<div class="check" data-answer="o(n)" data-alt="on|n">
+  <p class="check-q">3. では 167 の時間計算量は？（O(…) の形で）</p>
+  <input class="check-in" type="text" placeholder="例: O(n log n)">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">O(n)。各反復のコストは加算と比較だけなので <code>[時間2] = O(1)</code>、
+  内側ループはないので <code>[時間3] = -</code>（ここはあなたの解答で正しかった）。</p>
+</div>
+
+<h3>③のほうも1点だけ</h3>
+
+<p>
+提出された③：「ソートされているため left+right で大きい小さいを判断でき、捨てることが可能」。<br>
+これは<strong>3段導出の2段目</strong>（どちらを動かすか）です。3段目——<strong>捨てる側に良い答えが残っていない理由</strong>——が書かれていません。
+Lesson 07 の演習では口頭で言えていた内容です。<strong>対話では出るが、自分で書くと落ちる。</strong>
+</p>
+
+<div class="check" data-answer="15" data-alt="numbers[right]|最大|一番大きい">
+  <p class="check-q">4. <code>numbers=[2,7,11,15]</code>、<code>target=18</code>。<code>2</code> を捨ててよいと言うために、<code>2</code> は<strong>どの相手</strong>と組んだ結果を見れば十分か？（数字で）</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  <strong>15</strong>（残りで最大の相手）。2 にとって最も有利な相手と組んで 17。target 18 に届かない。
+  他の相手はもっと小さいので、<strong>2 はどの相手とも target に届かない</strong>。だから捨てられる。<br>
+  <em>③の3段目は、いつもこの形をしています</em>：「最も有利な条件で試してもダメだったから、残りは見なくてよい」。
+  </p>
+</div>
+
+<h2>今日の課題</h2>
+
+<ol>
+  <li>
+    <strong>167 の⑥を書き直す。</strong><code>[時間1]</code> はギャップ論法で。<code>[時間2]</code> も <code>-</code> ではなく埋める。
+    <code>③</code> は3段目まで書く。<strong>コードは触らなくてよい</strong>（正しいので）。
+  </li>
+  <li>
+    <strong><a href="https://leetcode.com/problems/container-with-most-water/">11. Container With Most Water</a></strong>。
+    実装前に、<strong>③を先に一文で書いてから</strong>コードを書いてください。<br>
+    面積は <code>min(h[l], h[r]) × (r - l)</code>。低いほうを動かします。
+    問いは<strong>「低いほうを残したとき、面積が絶対に増えないのはなぜか」</strong>——
+    高さと幅、両方に触れないと答えになりません。
+  </li>
+</ol>
+
+<div class="aside">
+  <span class="label">11 の⑥で自分に投げる質問</span>
+  <p>
+  「<strong>1回の判定で、候補のペアを何組捨てたか？</strong>」<br>
+  1組ではありません。<strong>捨てた柱を含むペアを全部</strong>です。それでも反復が n 回で済むのはなぜか——
+  ギャップ論法なら1行で言えます。
+  </p>
+</div>
+
+<h2>見るもの</h2>
+
+<p>
+<a href="https://www.youtube.com/watch?v=UuiTKBwPgAo">NeetCode — Container With Most Water</a>。
+前回も出しましたが、<strong>まだ見ていなければ実装のあとに</strong>見てください。
+③の言い方のモデルとして使うのが目的で、解法を知るためではありません。
+</p>
+
+<div class="footer">
+  <p>
+    関連：<a href="0007-two-pointers.html">Lesson 07 — 捨ててよい理由を言う</a> ·
+    <a href="0006-complexity-rubric.html">Lesson 06 — 計算量の rubric</a> ·
+    <a href="../reference/two-pointers-template.html">Two Pointers テンプレート（§4 を差し替え済み）</a> ·
+    <a href="../reference/interview-protocol.html">面接プロトコル</a>
+  </p>
+  <p>
+    <strong>11 の③が一文で書けなかったら、実装せずに聞いてください。</strong>
+    今回のように「理由は言えたが量が数えられない」逆のパターンも起きます。どちらも質問の対象です。
+  </p>
+</div>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

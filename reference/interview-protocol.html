@@ -169,6 +169,27 @@ LeetCode に提出するコードの冒頭に、②③⑥を残す。<strong>順
         """</code></pre>
 
 <div class="aside">
+  <span class="label">⚠ 欄を取り違えないための形式チェック</span>
+  <p>この学習者の誤りは「知らない」ではなく<strong>隣の欄に書いてしまう</strong>形で3回起きている。
+  内容ではなく<strong>文の形</strong>で判定すると弾ける。</p>
+  <table>
+    <thead><tr><th>欄</th><th>形の条件</th><th>違反の例</th></tr></thead>
+    <tbody>
+      <tr><td>[時間1]</td><td><strong>回数</strong>（n回 / log n回）。根拠は別に一行で</td><td>—</td></tr>
+      <tr><td>[時間2]</td><td><strong>必ず <code>O(…)</code> の形で終わる。</strong>式や変数名を書いたら
+          「＝ O(…)」まで書く</td><td><code>right-left</code>（コストではなく量）</td></tr>
+      <tr><td>②</td><td>動作の文。「<strong>…を動かす</strong>」で終わる</td><td>—</td></tr>
+      <tr><td>③</td><td><strong>不可能性の文。「…ない」で終わる否定文。</strong>
+          捨てる要素と<em>残り全員</em>が主語に入る</td><td>「left を増やす」（＝②）</td></tr>
+    </tbody>
+  </table>
+  <p><strong>③の定型文</strong>（埋めるだけ）：<br>
+  <em>捨てる <code>X</code> は、残りで最も有利な相手 <code>Y</code> と組んでも【目標】に達し<strong>ない</strong>。
+  他の相手は <code>Y</code> より不利なので、<code>X</code> は<strong>誰と組んでも</strong>達し<strong>ない</strong>。
+  よって <code>X</code> は解に含まれ得<strong>ない</strong>。</em></p>
+</div>
+
+<div class="aside">
   <span class="label">枠の使い分け</span>
   <ul>
     <li><strong>[時間2] と [時間3] を混ぜない。</strong>[時間2] は<em>毎回必ず</em>走る処理、
