@@ -156,6 +156,59 @@ while left &lt; right:
 
 <p>空間は追加の状態を持たなければ <strong>O(1)</strong>。ソートが必要なら <strong>O(n log n)</strong> が支配的になる。</p>
 
+<h2>4.5 入れ子（外側ループ ＋ two pointers）← 15. 3Sum の型</h2>
+
+<p>
+<strong>15 は新しい型ではなく、167 を n 回解く帰着。</strong><code>i</code> を固定すれば
+「ソート済み配列から和が <code>-nums[i]</code> のペアを探す」＝ 167 そのもの。
+この形になった瞬間、<strong>足し算（償却）は使えなくなる</strong>。
+</p>
+
+<table>
+  <thead><tr><th>内側のポインタは外側の反復に持ち越されるか</th><th>数え方</th><th>例</th></tr></thead>
+  <tbody>
+    <tr><td><strong>持ち越される</strong>（単調に進むだけ、戻らない）</td>
+        <td><strong>足し算</strong>（償却）<br><code>[時間1] + [時間3]</code></td>
+        <td>424, 3（sliding window）</td></tr>
+    <tr><td><strong>リセットされる</strong>（<code>j,k = i+1, n-1</code>）</td>
+        <td><strong>掛け算</strong><br><code>[時間1] × [時間3]</code></td>
+        <td>15, 16, 18</td></tr>
+  </tbody>
+</table>
+
+<pre><code>for i in range(len(nums)):          # n 回
+    j, k = i + 1, len(nums) - 1     # ← <strong>ここでリセットされる＝償却できない</strong>
+    while j &lt; k:                    # 各 i で最大 n 回
+        ...
+→ n × O(n) = <strong>O(n²)</strong>（ソートの n log n は飲まれる）</code></pre>
+
+<div class="aside">
+  <span class="label">内側ループの止め方は、外側の問題文が決める</span>
+  <p>
+  167 は「解は1つ、見つけたら <code>return</code>」。<strong>15 は全部列挙</strong>なので、和が 0 でも
+  <code>break</code> してはいけない（<code>j += 1; k -= 1</code> で続行）。<br>
+  <strong>内側は「その <code>i</code> に対する部分問題」を解ききる。</strong>
+  取りこぼしは必ず「同じ <code>i</code> の2組目以降」に出るので、テストは
+  <code>[-3,-1,0,1,2,3]</code> のように<strong>同じ最小値で2組できる入力</strong>を使う。
+  </p>
+</div>
+
+<pre><code># 15 の重複スキップ（set を使わない標準形）
+nums.sort()
+for i in range(len(nums) - 2):
+    if i &gt; 0 and nums[i] == nums[i-1]:
+        continue                       # 同じ i を二度やらない
+    j, k = i + 1, len(nums) - 1
+    while j &lt; k:
+        s = nums[i] + nums[j] + nums[k]
+        if s &lt; 0:   j += 1
+        elif s &gt; 0: k -= 1
+        else:
+            ans.append([nums[i], nums[j], nums[k]])
+            j += 1
+            while j &lt; k and nums[j] == nums[j-1]:
+                j += 1                 # <strong>j を進めた「あと」に置く</strong></code></pre>
+
 <h2>5. Python の地雷</h2>
 
 <ul>

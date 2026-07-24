@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 09 — 内側ループは部分問題</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 09 · Two Pointers</p>
+<h1>内側ループは、部分問題</h1>
+<p class="subtitle">15 は新しい型ではない。<strong>167 を n 回解く</strong>だけ。そう見ると、バグも計算量も同時に決まる。</p>
+
+<h2>まず、あなたの骨格は正しい</h2>
+
+<p>
+<code>sort()</code> → <code>i</code> を固定 → <code>j, k</code> で挟む。これは 3Sum の標準解そのものです。
+パターンの選択で迷った形跡はありません。今日直すのは<strong>2箇所だけ</strong>で、
+その2箇所は<strong>同じ一つの見落とし</strong>から出ています。
+</p>
+
+<h2>1. コードは通っていません</h2>
+
+<p>手元で走らせた結果です。</p>
+
+<pre><code>nums = [-3,-1,0,1,2,3]
+あなたの出力: [(-3,0,3), (-1,0,1)]
+正しい答え  : [(-3,0,3), (-1,0,1), <strong>(-3,1,2)</strong>]</code></pre>
+
+<p>
+<code>(-3,1,2)</code> が落ちています。原因は <code>break</code> です。<br>
+<code>i=0</code>（<code>-3</code>）のとき、<code>j,k</code> は <code>(-1,3)</code> → <code>(0,3)</code> で和 0 を見つけ、
+そこで <code>break</code> して <code>i=1</code> に進んでしまう。<strong><code>-3</code> を含む残りのペアを探していません。</strong>
+</p>
+
+<div class="aside">
+  <span class="label">なぜ <code>break</code> と書きたくなったか</span>
+  <p>
+  <strong>167 の記憶</strong>です。167 は「答えはちょうど1つ、見つけたら <code>return</code>」でした。
+  15 は<strong>全部列挙</strong>する問題です。<br>
+  <strong>内側ループの止め方は、外側の問題文が決めます。</strong>「1つ返せ」なら止めてよい。「全部返せ」なら
+  <em>その <code>i</code> に対する解を出し切る</em>まで止めない。
+  </p>
+</div>
+
+<p>正しくは、和が 0 のときも<strong>探索を続ける</strong>——両方のポインタを動かします。</p>
+
+<pre><code>if three_sum == 0:
+    ans.add((nums[i], nums[j], nums[k]))
+    j += 1
+    k -= 1        # ← break ではなく、次のペアへ</code></pre>
+
+<h2>2. 計算量は O(n) ではなく O(n²)</h2>
+
+<p>提出された⑥はこうでした。</p>
+
+<pre><code>[時間1] n回   [時間2] O(1)   [時間3] O(n)
+→ 時間: O(n)</code></pre>
+
+<p>
+前回渡した自己検算式（<code>[時間1] × [時間2] + [時間3]</code>）に入れると
+<code>n × O(1) + O(n) = O(n)</code>——<strong>矛盾が出ません</strong>。
+つまりあなたは検算を正しく実行しても、この誤りを見つけられなかった。
+<strong>これは検算式のほうが不完全でした</strong>（私の資料の欠陥です）。直します。
+</p>
+
+<h3>足し算になる条件</h3>
+
+<p>
+<code>[時間3]</code> を<strong>足す</strong>（＝償却）ことが許されるのは、
+内側ループのポインタが<strong>外側の反復をまたいで生き残る</strong>ときだけです。
+</p>
+
+<table>
+  <thead><tr><th></th><th>内側のポインタ</th><th>外側1周ぶんの総コスト</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>424 / 3</strong><br>sliding window</td>
+      <td><code>left</code> は<strong>一度も戻らない</strong>。<br>外側 <code>right</code> をまたいで単調に増える</td>
+      <td><strong>足し算</strong>　n + n = O(n)</td>
+    </tr>
+    <tr>
+      <td><strong>15</strong><br>3Sum</td>
+      <td><code>j, k = i+1, n-1</code> と<br><strong>毎回リセットされる</strong></td>
+      <td><strong>掛け算</strong>　n × n = O(n²)</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+判定は一つ：<strong>内側のポインタは、外側の次の反復に持ち越されるか？</strong><br>
+持ち越される → 足し算（償却）／初期化される → 掛け算。
+</blockquote>
+
+<p>
+だから <code>[時間3]</code> の欄には、これから<strong>どちらなのかを明記</strong>してください。
+数字だけ書くと、この区別が消えます。
+</p>
+
+<pre><code>[時間3] 内側ループ: 各 i で最大 n 回。<strong>j,k は毎回リセットされるので掛け算</strong>
+→ 時間: n × O(1) + n × n = O(n²)</code></pre>
+
+<h3>ついでに：ソートを計上する</h3>
+
+<p>
+<code>nums.sort()</code> は <strong>O(n log n)</strong>。今回は O(n²) に飲まれるので結論は変わりませんが、
+<strong>自分で書いたソートは必ず⑥に一行出す</strong>こと。O(n) や O(n log n) の解では、ここが支配項になります。
+</p>
+
+<h2>3. 空間の欄が自己矛盾している</h2>
+
+<pre><code>[空間2] 入りうる最大の要素数は: O(1)
+[空間3] 入力サイズに依存するか: <strong>する</strong>
+→ 空間: O(1)          ← [空間3] が「する」なら O(1) にはならない</code></pre>
+
+<p>
+<code>[空間2]</code> と <code>[空間3]</code> は<strong>同じことを二度聞いています</strong>。
+「最大要素数が定数」なら依存<em>しない</em>、「依存する」なら定数では<em>ない</em>。
+片方だけ埋めて片方を流用すると、ここでねじれます。<strong>2つの答えが整合しているか、書いた直後に見てください。</strong>
+</p>
+
+<p>
+正しくは：<code>ans</code> に入る三つ組の数は入力に依存する（→ 出力ぶん）。
+加えて Python の <code>sort()</code> は <strong>O(n)</strong> の作業領域を使います。
+面接での言い方は<strong>「出力を除けば O(n)（ソートの作業領域）」</strong>が安全です。
+</p>
+
+<h2>手を動かす</h2>
+
+<div class="check" data-answer="(-2,1,1)" data-alt="-2,1,1|[-2,1,1]|(1,1,-2)|1,1,-2">
+  <p class="check-q">1. <code>nums=[-2,0,1,1,2]</code>。<code>break</code> 版が取りこぼす三つ組を書いてください。（例：<code>(-1,0,1)</code>）</p>
+  <input class="check-in" type="text" placeholder="例: (-1,0,1)">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><code>(-2,1,1)</code>。<code>i=0</code> で先に <code>(-2,0,2)</code> を見つけて <code>break</code> するため、
+  <code>-2</code> に対する2組目に到達しません。<strong>取りこぼしは常に「同じ <code>i</code> の2組目以降」に出ます。</strong>
+  <br>※ <code>(-3,1,2)</code> と入力した方へ：それは本文の例（<code>[-3,-1,0,1,2,3]</code>）の答えです。考え方は同じ。</p>
+</div>
+
+<div class="check" data-answer="15" data-alt="15回|１５">
+  <p class="check-q">2. <code>n=6</code>、<code>break</code> なし。<code>i=0..5</code> の内側 <code>while</code> は<strong>合計</strong>何回まで回りますか？（<code>i</code> ごとの上限は <code>n-1-i</code> 回）</p>
+  <input class="check-in" type="text" placeholder="半角数字で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">15回（5+4+3+2+1+0）。<code>n(n-1)/2</code> です。
+  <strong>sliding window ならここは合計 6 回でした。</strong>この差が、足し算と掛け算の差。</p>
+</div>
+
+<div class="check" data-answer="o(n^2)" data-alt="on2|o(n²)|n^2|n²|o(n2)">
+  <p class="check-q">3. 上を踏まえて、15 の時間計算量を <code>O(…)</code> の形で書いてください。</p>
+  <input class="check-in" type="text" placeholder="例: O(n log n)">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><strong>O(n²)</strong>。ソートの O(n log n) はこれに飲まれます。
+  面接では<em>「ソートに n log n、その後 i ごとに O(n) の two pointers を n 回で n²。支配項は n²」</em>と言えば完成です。</p>
+</div>
+
+<div class="check" data-answer="リセットされる" data-alt="リセット|初期化される|初期化|毎回初期化される|持ち越されない">
+  <p class="check-q">4. 内側ループを「償却して足し算」にできない理由を、<code>j, k</code> の挙動として一語で。（例：<code>単調に増える</code>）</p>
+  <input class="check-in" type="text" placeholder="日本語で">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><strong>リセットされる</strong>（＝毎回初期化される／外側に持ち越されない）。
+  償却論法は「各要素が全体を通じて高々◯回しか触られない」と主張する型です。
+  <code>j,k</code> がリセットされると<strong>同じ要素が何度でも触られる</strong>ので、この主張が成立しません。</p>
+</div>
+
+<h2>③について（今回は減点なし、でも一段足りない）</h2>
+
+<p>提出された③：</p>
+
+<blockquote>和が0よりも大きい、あるいは小さいとわかっているため捨てても問題ない</blockquote>
+
+<p>
+「〜ない」で終わる否定文になっており、形式は<strong>合格</strong>です。ただし<strong>3段目が結論だけ</strong>。
+15 の③は 167 とまったく同じ構造なので、そのまま書けます（<code>i</code> を固定すれば <code>-nums[i]</code> を探す 167 です）：
+</p>
+
+<blockquote>
+和が <code>target</code> より小さいとき、<code>nums[j]</code> は<strong>残りで最大の相手 <code>nums[k]</code></strong> と組んでも届かない。
+他の相手は <code>nums[k]</code> より小さいので、<code>nums[j]</code> は<strong>誰と組んでも</strong>届か<strong>ない</strong>。
+よって <code>nums[j]</code> は（この <code>i</code> のもとで）解に含まれ得<strong>ない</strong>。
+</blockquote>
+
+<p><strong>「この <code>i</code> のもとで」が入るのが 15 の特徴です。</strong>③も部分問題の中の主張になります。</p>
+
+<h2>今日の課題</h2>
+
+<ol>
+  <li>
+    <strong>15 を直して通す。</strong><code>break</code> を修正し、⑥の <code>[時間3]</code> は
+    <em>「リセットされるので掛け算」</em>を明記した形で書き直す。<code>[空間2]</code> と <code>[空間3]</code> の整合も確認。<br>
+    余力があれば <code>set</code> をやめて<strong>重複スキップ</strong>で書いてください（面接ではこちらが標準）：
+    <pre><code>for i in range(len(nums)):
+    if i &gt; 0 and nums[i] == nums[i-1]:
+        continue                       # 同じ i を二度やらない
+    j, k = i + 1, len(nums) - 1
+    while j &lt; k:                       # ← <strong>探索の継続条件。ここに重複判定を足さない</strong>
+        ...
+        else:
+            ans.append([nums[i], nums[j], nums[k]])
+            j += 1
+            k -= 1
+            while j &lt; k and nums[j] == nums[j-1]:
+                j += 1                 # ← <strong>重複スキップ。0 を見つけた直後の、この位置だけ</strong></code></pre>
+    <p><strong><code>while j &lt; k</code> が2つ出てきますが、役割はまったく別です。</strong>
+    外側＝<em>探索を続けるか</em>、内側＝<em>いま見た値と同じものを飛ばすか</em>。
+    2つを <code>and</code> でつなぐと、<strong>「重複しているときだけ探索する」</strong>という別物になります。</p>
+    <strong><code>⚠</code> にはこの <code>while</code> の境界を書いてください</strong>——実際ここが唯一の危険地帯です。
+  </li>
+  <li>
+    <strong><a href="https://leetcode.com/problems/3sum-closest/">16. 3Sum Closest</a></strong>。
+    同じ帰着（<code>i</code> を固定 → two pointers）ですが、目的が「ちょうど 0」から「<strong>最も近い</strong>」に変わります。<br>
+    実装前に一つだけ答えてください：<strong>和が target と一致したとき、そこで <code>return</code> してよいか？</strong>
+    今日の「内側ループの止め方は外側の問題文が決める」で判断できます。
+  </li>
+</ol>
+
+<h2>見るもの</h2>
+
+<p>
+<a href="https://www.youtube.com/watch?v=jzZsG8n2R9A">NeetCode — 3Sum</a>。
+<strong>重複スキップの2箇所</strong>（<code>i</code> 側と <code>j</code> 側）を、なぜ片方だけでは足りないかに注意して見てください。
+</p>
+
+<div class="footer">
+  <p>
+    関連：<a href="0008-counting-the-discard.html">Lesson 08 — 捨てる量を数える</a> ·
+    <a href="0004-amortized-argument.html">Lesson 04 — 償却論法</a> ·
+    <a href="../reference/two-pointers-template.html">Two Pointers テンプレート（§4.5 を追加）</a> ·
+    <a href="../reference/interview-protocol.html">面接プロトコル（[時間3] の欄を変更）</a>
+  </p>
+  <p>
+    <strong>16 の「一致したら return してよいか」に自信が持てなければ、実装せずに聞いてください。</strong>
+    今日の内容がそのまま試される場所です。
+  </p>
+</div>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

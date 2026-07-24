@@ -190,6 +190,22 @@ LeetCode に提出するコードの冒頭に、②③⑥を残す。<strong>順
 誤: n/2 × n回   + n = O(n²)  ← 結論 O(n) と矛盾 → [時間2] が misfile
 正: n/2 × O(1)  + n = O(n)   ← 一致 ✓</code></pre>
 
+  <p><strong>ただし「+ [時間3]」が使えるのは償却できるときだけ</strong>（15. 3Sum で誤検知した）。
+  <code>[時間3]</code> を書いたら、先にこの一問に答える：</p>
+  <pre><code>内側ループのポインタは、外側の次の反復に<strong>持ち越されるか</strong>？
+
+  持ち越される（戻らない）  → <strong>+ [時間3]</strong>（償却）   例: 424, 3
+  毎回リセットされる        → <strong>× [時間3]</strong>（掛け算） 例: 15, 16
+
+15: j,k = i+1, n-1 が毎回初期化される → n × n = O(n²)   ← 足すと O(n) になり誤る</code></pre>
+  <p><strong><code>[時間3]</code> の欄には回数だけでなく、どちらなのかを必ず書く。</strong>
+  → <a href="../lessons/0009-nested-two-pointers.html">Lesson 09</a></p>
+
+  <p><strong>空間も2欄が整合しているか見る。</strong><code>[空間2]</code>（最大要素数）と
+  <code>[空間3]</code>（入力依存か）は同じことを二度聞いている。
+  <em>定数個 ⟺ 依存しない</em>。「最大 O(1) 個」なのに「依存する」と書いたら、どちらかが流用。</p>
+  <p><strong>自分で書いたソートは必ず一行計上する</strong>（Python の <code>sort()</code> は時間 O(n log n)・作業領域 O(n)）。</p>
+
   <p><strong>③の定型文</strong>（埋めるだけ）：<br>
   <em>捨てる <code>X</code> は、残りで最も有利な相手 <code>Y</code> と組んでも【目標】に達し<strong>ない</strong>。
   他の相手は <code>Y</code> より不利なので、<code>X</code> は<strong>誰と組んでも</strong>達し<strong>ない</strong>。
@@ -246,8 +262,9 @@ LeetCode に提出するコードの冒頭に、②③⑥を残す。<strong>順
       <td><code>max(counter.values())</code> は毎回走る。最大26回＝<strong>定数</strong></td>
     </tr>
     <tr>
-      <td>[時間3] <strong>回るとは限らない</strong>内側ループ（＝償却で数える部分）</td>
-      <td><code>while</code> は毎回回るとは限らない。<strong>全体で合計 2n 回</strong>（→ <a href="../lessons/0004-amortized-argument.html">3文テンプレート</a>）</td>
+      <td>[時間3] 内側ループ。<strong>ポインタが持ち越されるか（＝償却して足す）／リセットされるか（＝掛ける）を明記する</strong></td>
+      <td><code>while</code> は毎回回るとは限らない。<code>left</code> は戻らないので<strong>持ち越し＝全体で合計 2n 回</strong>（→ <a href="../lessons/0004-amortized-argument.html">3文テンプレート</a>）。
+      15 なら「各 i で最大 n 回。<strong>リセットされるので掛け算</strong>」（→ <a href="../lessons/0009-nested-two-pointers.html">Lesson 09</a>）</td>
     </tr>
     <tr>
       <td rowspan="3">空間</td>
