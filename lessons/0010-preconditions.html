@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 10 — 前提は③の中にある</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 10 · Two Pointers</p>
+<h1>前提は、③の中にある</h1>
+<p class="subtitle">16 で足りなかったのは1行だけ。そしてその1行は、<strong>③を一般形で書けば文の中に自分から現れる</strong>。</p>
+
+<h2>まず、診断</h2>
+
+<p>
+提出されたコードを手元で走らせました。LeetCode の「答えは一意」という制約を満たすランダム入力
+7458 件での結果です。
+</p>
+
+<pre><code>あなたのコード             : 2641件 失敗 (35%)
+nums.sort() を1行足した版  : <strong>0件 失敗</strong></code></pre>
+
+<pre><code>nums = [-1, 2, 1, -4], target = 1
+あなたの出力: -1
+正しい答え  : 2      # (-1) + 2 + 1</code></pre>
+
+<p>
+<strong>欠けていたのは <code>nums.sort()</code> の1行だけです。</strong>
+両ポインタの動かし方も、<code>min_diff</code> の更新位置も、更新を移動の<em>後</em>に置きつつ
+移動<em>前</em>の <code>three_sum</code> を使っている点も、すべて正しい。
+</p>
+
+<div class="aside">
+  <span class="label">先に合格点を1つ</span>
+  <p>
+  <a href="./0009-nested-two-pointers.html">Lesson 09</a> の宿題は
+  「<strong>target 一致で <code>return</code> してよいかを、外側の問題文から判断できるか</strong>」でした。
+  あなたは <code>else: return three_sum</code> と書いています。<strong>正解です。</strong>
+  16 は「最も近い和を<em>1つ</em>返せ」なので、差 0 に当たったらそれが最適で即座に返してよい。
+  15 で <code>break</code> を書いてしまったのと同じ判断を、今回は問題文から正しく引き直せています。
+  <a href="../learning-records/0014-inner-loop-multiplies.md">LR-0014</a> の指摘は定着しました。
+  </p>
+</div>
+
+<h2>1. 40分が溶けた本当の理由</h2>
+
+<p>
+コードのどこにもバグはありませんでした。にもかかわらず答えが合わない。
+このとき人間が最後まで疑わないのが<strong>前提</strong>です。
+アルゴリズムは目に見えるが、前提は<strong>コードに書かれていないので目に見えない</strong>。
+</p>
+
+<p>
+そして 16 では、前提を落とすと<strong>プログラムが落ちません</strong>。
+例外も無限ループも起きず、それっぽい数字を返してくる。だから「ロジックのどこかが微妙に違う」と読んでしまう。
+探す場所が最初から間違っていたので、40分かけても見つかりません。
+</p>
+
+<div class="aside">
+  <span class="label">デバッグの順序</span>
+  <p>
+  出力が合わないとき、<strong>ロジックより先に前提を疑う</strong>。<br>
+  「この解法は、入力について何を仮定していた？ その仮定は今このコードで保証されている？」<br>
+  前提の確認は10秒で終わります。ロジックの追跡は40分かかります。<strong>安いほうから。</strong>
+  </p>
+</div>
+
+<h2>2. 核心：③を一般形で書くと、前提が文に現れる</h2>
+
+<p>
+16 の③（捨ててよい理由）を、具体例ではなく<a href="../learning-records/0012-bound-not-value.md">一般形</a>で書いてみます。
+<code>i</code> は固定、探しているのは <code>nums[j] + nums[k]</code> が <code>target - nums[i]</code> に最も近いペア。
+</p>
+
+<pre><code>いま <code>three_sum &lt; target</code> だとする。<code>j</code> を固定したまま <code>k</code> を減らすと、
+<strong>ソート順より</strong> <code>nums[k'] ≤ nums[k]</code> なので和はさらに小さくなり、
+target からの距離はさらに<strong>広がる</strong>。
+よって <code>(j, k')</code> の組はどれも、<strong>いま記録した値を超えられない</strong>。</code></pre>
+
+<p>
+2行目に <strong>「ソート順より」</strong> が出てきました。これは飾りではありません。
+<strong>この一句が消えると③は成立しません。</strong>ソートされていなければ
+「<code>k</code> を減らすと和が小さくなる」が言えず、
+<code>k</code> の左側に target ぴったりの相手が残っている可能性を消せない。
+</p>
+
+<p class="lead">
+<strong>③が依存している事実 ＝ その解法の前提。</strong><br>
+③を書けば、前提は探すまでもなく文の中から出てくる。書かないと、コードからも消える。
+</p>
+
+<p>
+<a href="../learning-records/0012-bound-not-value.md">LR-0012</a> で
+「③が正しく書ければ、コードの<strong>分岐</strong>は自動的に決まる」と確認しました。今回はその続きです：
+<strong>③が正しく書ければ、コードの<strong>前処理</strong>も自動的に決まる。</strong>
+</p>
+
+<div class="quiz">
+  <p class="quiz-q">16 で <code>nums.sort()</code> が必要なのは、次のどの主張を成り立たせるためか。</p>
+  <button class="quiz-opt" data-correct>k を減らすと和が必ず小さくなる、が言えるから</button>
+  <button class="quiz-opt">重複する三つ組を隣接判定で除去できるようになるから</button>
+  <button class="quiz-opt">探索範囲が毎回半分になり計算量が落ちるから</button>
+  <button class="quiz-opt">最小値と最大値が両端に来て初期化が楽になるから</button>
+  <p class="quiz-fb">
+  ソートが与えているのは<strong>単調性</strong>——「ポインタを動かすと値が決まった向きに動く」という保証だけです。
+  これが③（＝捨てた組は手元の値を超えられない）を支えています。<br>
+  なお「重複除去」は <strong>15</strong> で必要だった別の用途。16 は和を1つ返すだけなので重複スキップは要りません。
+  <strong>同じ <code>sort()</code> でも、問題ごとに理由が違う</strong>——15 の理由を 16 に持ち込まないこと。
+  </p>
+</div>
+
+<h2>3. 「11 ではソート要らないと言ったのに」の整理</h2>
+
+<p>
+<a href="../learning-records/0012-bound-not-value.md">LR-0012</a> で
+「<strong>ソートは③の必須条件ではなく、上限を得る手段のひとつ</strong>」と強調しました。これは正しい。
+ただしその逆——<em>いつ要るのか</em>——を並べて言っていませんでした。ここで揃えます。
+</p>
+
+<table>
+  <thead><tr><th>問題</th><th>③の上限はどこから来るか</th><th>ソート</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>11. Container With Most Water</td>
+      <td>幅は<strong>添字</strong>から、水位は <code>min</code> の性質から</td>
+      <td>不要</td>
+    </tr>
+    <tr>
+      <td>125. Valid Palindrome</td>
+      <td>上限ではなく<strong>対称性</strong>（同値変形）</td>
+      <td>不要</td>
+    </tr>
+    <tr>
+      <td>167 / 15 / <strong>16</strong></td>
+      <td><strong>値の大小</strong>（和が単調に動くこと）</td>
+      <td><strong>必須</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="lead">
+判定は一つです。<strong>③が「値の大小」に依存しているならソートが要る。添字や対称性で済むなら要らない。</strong>
+</p>
+
+<p>
+11 の <code>h[j]</code> は最後まで一度も要りませんでした。だからソートも要らなかった。
+16 は <code>nums[k]</code> の値そのものを比べています。だから要る。
+「11 で要らなかった」は 11 に固有の事情であって、two pointers 一般の性質ではありません。
+</p>
+
+<div class="check" data-answer="値の大小" data-alt="値の大小に依存する|大小|値の大小に依存しているか">
+  <p class="check-q">③がどこに依存していたらソートが必要か。5文字で。</p>
+  <input class="check-in" type="text" placeholder="ここに入力">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  <strong>値の大小</strong>。③の文に「〜より大きい／小さい」が出てきたら、その順序は誰が保証しているのかを確認する。
+  誰も保証していなければ <code>sort()</code> を自分で書く。
+  </p>
+</div>
+
+<h2>4. ⓪前提 という欄を足します</h2>
+
+<p>
+<a href="../reference/interview-protocol.html">interview-protocol</a> の docstring に、②の前に一行足します。
+</p>
+
+<pre><code>"""
+⓪ 前提（この解法が入力に要求する条件）: <strong>昇順にソート済みであること</strong>
+   → コードで保証している行: <strong>nums.sort()</strong>
+
+② 素朴解:  ...
+"""</code></pre>
+
+<p>
+2行目が本体です。<strong>前提を書いたら、それを保証している行を名指しする。</strong>
+名指しできなければ、その行はまだ存在していません——今回がまさにそれでした。
+</p>
+
+<div class="aside">
+  <span class="label">面接での効き目</span>
+  <p>
+  ⓪は減点回避ではなく<strong>加点</strong>です。「この解法はソート済みを前提にします。入力は保証されていますか？
+  されていなければ自分でソートしますが、その <code>O(n log n)</code> は全体の <code>O(n²)</code> に吸収されます」
+  ——これは①（問題の確認）と⑥（計算量）を一息で繋いだ発言で、面接官が最も聞きたい形です。
+  </p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">16 の <code>nums.sort()</code> は、⑥の計算量にどう計上するのが正しいか。</p>
+  <button class="quiz-opt" data-correct>時間は O(n²) に吸収、空間は sort の分を計上</button>
+  <button class="quiz-opt">時間は O(n²) に吸収、空間も定数なので計上不要</button>
+  <button class="quiz-opt">時間を O(n²logn) に修正、空間は追加分を計上</button>
+  <button class="quiz-opt">時間を O(n²logn) に修正、空間は変わらず定数</button>
+  <p class="quiz-fb">
+  時間：<code>n log n + n² = O(n²)</code>。log は消えます。<br>
+  空間：Python の <code>list.sort()</code> は Timsort で、最悪 <code>O(n)</code> の作業領域を使います。
+  ポインタしか持たなくても<strong>全体の空間は O(n)</strong>。
+  「<code>O(1)</code>」と書きたくなりますが、それは <code>sort()</code> を自分で書いたことを忘れている状態です
+  （<a href="../learning-records/0014-inner-loop-multiplies.md">LR-0014</a> の「主張と実装の不一致」の再発地点）。
+  </p>
+</div>
+
+<h2>5. 今日の課題</h2>
+
+<ol>
+  <li><strong>16 を通す。</strong>コードは <code>nums.sort()</code> を足すだけです。1分で終わります。</li>
+  <li><strong>docstring を書く。</strong>⓪②③⑥。⓪は「前提」と「保証している行」の2行。
+      <code>[時間3]</code> には<strong>持ち越しかリセットか</strong>を明記すること
+      （<a href="../learning-records/0014-inner-loop-multiplies.md">LR-0014</a> の未回収分）。</li>
+  <li><strong>③は一般形で。</strong><code>nums[0]</code> のような具体例で書かない。
+      文中に「ソート順より」が現れているかを自分で確認する。</li>
+  <li><strong>⚠ いちばん自信のない行</strong>を1行。6回連続で的中しています。今回もその問題固有の行を。</li>
+  <li>そのあと <strong>18. 4Sum</strong>。⓪③はほぼ同じ、変わるのは <code>[時間1]</code> と重複スキップです。</li>
+</ol>
+
+<div class="aside">
+  <span class="label">提出前チェック（3つだけ）</span>
+  <p>
+  1. <strong>前の問題（15）の文が混ざっていないか。</strong>重複スキップの話は 16 には要らない。<br>
+  2. <strong>⓪で書いた前提を保証する行が、コードに実在するか。</strong><br>
+  3. <strong><code>[空間2]</code> と <code>[空間3]</code> が矛盾していないか</strong>（定数個 ⟺ 依存しない）。
+     15 で名指しした唯一の未修正箇所です。今回は <code>sort()</code> があるので
+     <code>O(1)</code> にはなりません。
+  </p>
+</div>
+
+<h2>読むもの</h2>
+
+<p>
+<strong>主資料：</strong>
+<a href="https://docs.python.org/3/howto/sorting.html">Sorting Techniques — Python 公式 HOWTO</a>。
+<code>list.sort()</code> と <code>sorted()</code> の違い（前者は破壊的・返り値 <code>None</code>／後者は新規リスト）は
+面接で <code>nums = nums.sort()</code> と書いて <code>None</code> を掴む定番の事故です。
+計算量と作業領域は <a href="https://wiki.python.org/moin/TimeComplexity">TimeComplexity — Python Wiki</a>。
+</p>
+
+<p class="footer">
+分からないところは<strong>その場で聞いてください</strong>。私はあなたの教師です。<br>
+③の書き方、⓪の粒度、18 に進む前の確認——どれでも。<br>
+関連：<a href="./0009-nested-two-pointers.html">Lesson 09</a> ·
+<a href="../reference/two-pointers-template.html">Two Pointers テンプレート</a> ·
+<a href="../reference/interview-protocol.html">面接プロトコル</a> ·
+<a href="../reference/glossary.html">用語集</a>
+</p>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

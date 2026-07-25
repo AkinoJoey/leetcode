@@ -65,6 +65,14 @@ h3 { font-size: 1.05rem; font-weight: 600; margin: 2rem 0 .5rem; }
   font-style: italic;
   margin: 0 0 2.5rem;
 }
+/* 一段落だけを「その節の結論」として立てる。節に1つまで。 */
+.lead {
+  border-left: 3px solid currentColor;
+  padding: .1rem 0 .1rem 1rem;
+  margin: 1.6rem 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
 .eyebrow {
   font-family: var(--mono);
   font-size: .72rem;

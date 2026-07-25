@@ -127,23 +127,47 @@
 
 <p>用語の定義は <a href="./glossary.html">用語集</a>（「単調」「償却論法」など）。</p>
 
-<h2>練習時の記録フォーマット（〜2026年8月まで）</h2>
+<h2>練習時の提出フォーマット（2026-07-25 改訂）</h2>
 
 <p>
-LeetCode に提出するコードの冒頭に、②③⑥を残す。<strong>順序を守ること。</strong>
+<strong>docstring の枠を埋める方式は終了。</strong>2パートに分けて<strong>自由形式</strong>で答える
+（学習者の提案により変更。理由：面接に近く、枠自体がヒントにならない）。
 </p>
 
-<ol>
-  <li><strong>まず口に出す</strong>（30秒。書かない）</li>
-  <li><strong>口に出せた内容だけを</strong>書き写す。<em>言えなかったことを補って書かない</em></li>
-</ol>
+<table>
+  <thead><tr><th></th><th>タイミング</th><th>答えること</th></tr></thead>
+  <tbody>
+    <tr><td><strong>実装前</strong></td><td>コードを1行も書く前</td>
+      <td>「どう解きますか」への一続きの説明。方針・前提・捨ててよい理由</td></tr>
+    <tr><td><strong>実装後</strong></td><td>コードを貼った後</td>
+      <td>面接官の追い質問（計算量／前提／いちばん弱い行）に答える</td></tr>
+  </tbody>
+</table>
 
-<p>関数の直下に docstring（<code>"""</code>）で置く。複数行なので <code>#</code> より書きやすい。</p>
+<div class="aside">
+  <span class="label">枠は消えたのではなく、採点側に移った</span>
+  <p>
+  以下の rubric は<strong>教える側の答え合わせ用</strong>。学習者には枠も項目名も提示しない。
+  提出後に「出てこなかった項目」だけを返す。<strong>その場でヒントは出さない。</strong><br>
+  理由：<strong>枠は完全性を保証すると同時に捏造する。</strong>欄があるから埋まっていただけの項目は、
+  白紙にして初めて露出する（<a href="../learning-records/0009-rubric-fixed-explanation.md">LR-0009</a> の限界）。
+  また ⓪前提 は<strong>実装前に言えなければ意味がない</strong>
+  （<a href="../learning-records/0015-preconditions-are-invisible.md">LR-0015</a> の40分は事後記入では防げない）。
+  </p>
+</div>
+
+<p>
+以下の docstring 例は<strong>各項目が何を指すかの定義</strong>として残す（提出形式としては使わない）。
+</p>
 
 <pre><code>class Solution:
     def characterReplacement(self, s: str, k: int) -&gt; int:
         """
         valid とは: k回以下の置き換えで、窓を全部同じ文字にできる
+
+        ⓪ 前提（この解法が入力に要求する条件）: —
+           保証している行: —
+           ↑ 例（16. 3Sum Closest）: 前提「昇順にソート済み」／保証している行「nums.sort()」
 
         ② 素朴解（口頭で言えたことだけ）:
             やり方: 全ての部分文字列を取り出して、それぞれ「長さ - 最頻文字数 &lt;= k」を判定
@@ -191,13 +215,18 @@ LeetCode に提出するコードの冒頭に、②③⑥を残す。<strong>順
 正: n/2 × O(1)  + n = O(n)   ← 一致 ✓</code></pre>
 
   <p><strong>ただし「+ [時間3]」が使えるのは償却できるときだけ</strong>（15. 3Sum で誤検知した）。
-  <code>[時間3]</code> を書いたら、先にこの一問に答える：</p>
-  <pre><code>内側ループのポインタは、外側の次の反復に<strong>持ち越されるか</strong>？
+  判定は<strong>追跡しない。インデントを見る</strong>（3回連続で追跡に失敗したため改訂
+  → <a href="../lessons/0011-indentation-decides.html">Lesson 11</a>）：</p>
+  <pre><code><strong>内側ポインタの初期化行は、外側ループの外か中か？</strong>
 
-  持ち越される（戻らない）  → <strong>+ [時間3]</strong>（償却）   例: 424, 3
-  毎回リセットされる        → <strong>× [時間3]</strong>（掛け算） 例: 15, 16
+  <strong>外</strong>（＝前の周の続きから始まる。戻らない） → <strong>足し算</strong>（償却） 例: 3, 424, 1004
+  <strong>中</strong>（＝毎周ゼロからやり直す）           → <strong>掛け算</strong>         例: 15, 16, 18
 
-15: j,k = i+1, n-1 が毎回初期化される → n × n = O(n²)   ← 足すと O(n) になり誤る</code></pre>
+424: left = 0            ← for の外  → n + n = O(n)
+16 : j,k = i+1, n-1      ← for の中  → n × n = O(n²)</code></pre>
+  <p><strong>「外側と内側でループが回るから O(n²)」は根拠にならない</strong>——424 でも同じことが言えてしまう。
+  この判定が効く前提は<strong>内側ポインタが単調に進むこと</strong>（ループ内で戻す実装なら成り立たない
+  ＝ <a href="../learning-records/0002-left-monotonicity.md">LR-0002</a>）。</p>
   <p><strong><code>[時間3]</code> の欄には回数だけでなく、どちらなのかを必ず書く。</strong>
   → <a href="../lessons/0009-nested-two-pointers.html">Lesson 09</a></p>
 
@@ -205,6 +234,12 @@ LeetCode に提出するコードの冒頭に、②③⑥を残す。<strong>順
   <code>[空間3]</code>（入力依存か）は同じことを二度聞いている。
   <em>定数個 ⟺ 依存しない</em>。「最大 O(1) 個」なのに「依存する」と書いたら、どちらかが流用。</p>
   <p><strong>自分で書いたソートは必ず一行計上する</strong>（Python の <code>sort()</code> は時間 O(n log n)・作業領域 O(n)）。</p>
+
+  <p><strong>⓪ は必ず2行で書く。</strong>1行目が前提、2行目が<strong>それを保証しているコードの行の名指し</strong>。
+  前提は書けるのに保証する行を名指しできないなら、<strong>その行はまだ存在していない</strong>
+  （16. 3Sum Closest で <code>nums.sort()</code> を落としたのがこの形）。<br>
+  <strong>③の文に「〜より大きい／小さい」が出てきたら、その順序を誰が保証しているのかを ⓪ で答える。</strong>
+  → <a href="../lessons/0010-preconditions.html">Lesson 10</a></p>
 
   <p><strong>③の定型文</strong>（埋めるだけ）：<br>
   <em>捨てる <code>X</code> は、残りで最も有利な相手 <code>Y</code> と組んでも【目標】に達し<strong>ない</strong>。
@@ -252,6 +287,14 @@ LeetCode に提出するコードの冒頭に、②③⑥を残す。<strong>順
 <table>
   <thead><tr><th>項目</th><th>言うべき要素</th><th>例（424）</th></tr></thead>
   <tbody>
+    <tr>
+      <td>⓪ 前提</td>
+      <td><strong>2行。</strong>①この解法が入力に要求する条件／②<strong>それを保証しているコードの行の名指し</strong>。
+        名指しできなければ、その行はまだ書かれていない</td>
+      <td>16: 前提「昇順にソート済み」／保証している行「<code>nums.sort()</code>」<br>
+        167: 前提「昇順にソート済み」／保証している行「<strong>—（問題文が保証）</strong>」<br>
+        11 / 125 / 424: <code>—</code>（③が値の大小に依存していないので前提なし）</td>
+    </tr>
     <tr>
       <td rowspan="3">時間</td>
       <td>[時間1] 外側が何回回るか</td>

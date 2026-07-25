@@ -88,6 +88,29 @@ while left &lt; right:
 </table>
 
 <div class="aside">
+  <span class="label">③を書く手順（いきなり文を書かない）</span>
+  <p>
+  <strong>③の主語は、消えた組。</strong>②の主語はポインタ。ここがずれると、5回書いても②になる
+  （実際に起きた → <a href="../lessons/0012-the-erased-column.html">Lesson 12</a>）。
+  文を書く前に、<strong>先に2つ名指しする</strong>：
+  </p>
+  <ol>
+    <li><strong>いま消えたのは、どの組か。</strong>添字で、1組ではなく<strong>集合</strong>で。
+      評価済みの組は含めない（もう答えに反映されている）<br>
+      <em>例（4Sum, <code>d -= 1</code>）：</em> <code>(c+1,d) … (d-1,d)</code> ＝ <code>d</code> を右端に持つ未評価の組すべて</li>
+    <li><strong>その全部が、手元の値と比べてどうなるか。</strong>根拠は<strong>ソート順 / min / 添字</strong>のいずれか</li>
+  </ol>
+  <p>
+  この2つが埋まれば、③は「よって、それらは【目標】に達し<strong>ない</strong>」で閉じるだけ。<br>
+  <strong>1 が書けないうちに③を書こうとすると必ず②になる</strong>——手元に移動の話しか材料が無いから。
+  </p>
+  <p>
+  <strong>判定：「小さくできる」「動かせる」が入っていたら②。</strong>
+  ③に出てよいのは〈消えた組〉〈順序の根拠〉〈超えていた／届かなかったという事実〉の3つだけ。
+  </p>
+</div>
+
+<div class="aside">
   <span class="label">③の3原則</span>
   <ol>
     <li><strong>値を知るのではなく、上限を押さえる。</strong>捨てる要素が他の相手と組んだ結果は
@@ -99,22 +122,45 @@ while left &lt; right:
   </ol>
 </div>
 
-<h3>上限はどこから来るか（ソートは必須ではない）</h3>
+<h3>上限はどこから来るか ＝ ソートが要るかの判定</h3>
 
 <table>
   <thead><tr><th>問題</th><th>何を押さえるか</th><th>上限の出どころ</th><th>ソート</th></tr></thead>
   <tbody>
-    <tr><td>167</td><td>他の相手との和</td><td><strong>ソート順</strong>（<code>arr[j] ≤ arr[right]</code>）</td><td>必須</td></tr>
+    <tr><td>167</td><td>他の相手との和</td><td><strong>ソート順</strong>（<code>arr[j] ≤ arr[right]</code>）</td><td>必須（問題文が保証）</td></tr>
+    <tr><td>15 / <strong>16</strong> / 18</td><td>他の相手との和</td><td><strong>ソート順</strong></td><td><strong>必須（自分で書く）</strong></td></tr>
     <tr><td>11</td><td>面積</td><td><strong><code>min</code> と添字</strong>
       （水位 <code>min(h[l],h[j]) ≤ h[l]</code>、幅 <code>j-l &lt; r-l</code>）</td><td><strong>不要</strong></td></tr>
     <tr><td>125</td><td>外側の対の判定</td><td><strong>対称性</strong></td><td>不要</td></tr>
   </tbody>
 </table>
 
+<p class="lead">
+判定はこの一文に尽きる。<br>
+<strong>③が「値の大小」に依存しているならソートが要る。添字や対称性で済むなら要らない。</strong>
+</p>
+
+<div class="aside">
+  <span class="label">両方向を覚えること（片方だけだと必ず事故る）</span>
+  <p>
+  <strong>要らない側：</strong>ソートは③の必須条件ではなく、上限を得る<em>手段のひとつ</em>。
+  11 では <code>h[j]</code> の値を最後まで一度も使わずに③が完成する
+  ——ソートされていなくても捨てられる。→ <a href="../lessons/0008-counting-the-discard.html">Lesson 08</a><br>
+  <strong>要る側：</strong>③の文に「<strong>〜より大きい／小さい</strong>」が現れたら、その順序は誰かが保証していなければならない。
+  問題文が保証していなければ <code>nums.sort()</code> を<strong>自分で書く</strong>。
+  16 はこの1行の欠落だけで 35% の入力に対して誤答した。→ <a href="../lessons/0010-preconditions.html">Lesson 10</a>
+  </p>
+  <p>
+  <strong>③を一般形で書けば、前提は文の中から自分で出てくる。</strong>
+  「<em>ソート順より</em> <code>nums[k'] ≤ nums[k]</code> なので和はさらに小さくなり…」——
+  この「ソート順より」が ⓪ に書くべき前提そのもの。
+  </p>
+</div>
+
 <p>
-<strong>ソートは③の必須条件ではなく、上限を得る手段のひとつ。</strong>
-11 では <code>h[j]</code> の値を最後まで一度も使わずに③が完成する
-——ソートされていなくても捨てられる。→ <a href="../lessons/0008-counting-the-discard.html">Lesson 08</a>
+また、同じ <code>sort()</code> でも<strong>問題ごとに理由が違う</strong>。
+15 のソートは③（単調性）と<strong>重複スキップ</strong>の両方に効くが、16 は和を1つ返すだけなので
+重複スキップは不要。<strong>15 の理由を 16 に持ち込まない。</strong>
 </p>
 
 <div class="aside">
@@ -208,6 +254,30 @@ for i in range(len(nums) - 2):
             j += 1
             while j &lt; k and nums[j] == nums[j-1]:
                 j += 1                 # <strong>j を進めた「あと」に置く</strong></code></pre>
+
+<div class="aside">
+  <span class="label">重複スキップの境界は、そのループの開始位置</span>
+  <p>
+  <code>if i &gt; 0</code> の <code>0</code> に意味はない。<strong><code>i</code> の開始位置がたまたま 0 だから</strong>。
+  段が増えたら、比べる相手も変わる：
+  </p>
+  <pre><code>for a in range(...):            # a は <strong>0</strong> から
+    if a &gt; <strong>0</strong>    and nums[a] == nums[a-1]: continue
+    for b in range(<strong>a+1</strong>, ...):   # b は <strong>a+1</strong> から
+        if b &gt; <strong>a+1</strong> and nums[b] == nums[b-1]: continue</code></pre>
+  <p>
+  <code>b &gt; 1</code> と書くと、<code>b</code> がそのループの<strong>1周目</strong>（<code>b == a+1</code>）でも
+  <code>nums[b] == nums[a]</code> なら飛ばしてしまう。<code>[1,1,1,1]</code> のような
+  <strong>同じ値が並ぶ解が丸ごと消える</strong>（18 で実際に起きた。ランダム4000件中 358件で誤答、
+  ただし<strong>LeetCode の例題は通る</strong>）。<br>
+  <strong>意味は「このループで2周目以降なら、前回と同じ値を飛ばす」。</strong>だから比べる相手は常に開始位置。
+  </p>
+  <p>
+  <strong>スキップするのは左ポインタ側だけでよい</strong>（<code>j</code> / <code>c</code>）。
+  外側が固定されていれば、<strong>1つの左の値に対して和が一致する右の値は高々1つ</strong>なので、
+  右側の重複は自動的に潰れる。
+  </p>
+</div>
 
 <h2>5. Python の地雷</h2>
 

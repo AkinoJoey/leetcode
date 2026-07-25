@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 11 — 掛け算か足し算かは、インデントで決まる</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 11 · 計算量</p>
+<h1>掛け算か足し算かは、<br>インデントで決まる</h1>
+<p class="subtitle">3回連続で同じ場所に止まっています。原因は私の説明の抽象度なので、<strong>目で見えるものに置き換えます</strong>。</p>
+
+<h2>これまでの説明が悪かった</h2>
+
+<p>
+私はこう書いていました——「内側ポインタが<strong>持ち越されるか、リセットされるか</strong>」。
+これは正しいのですが、<strong>頭の中で追跡しないと判定できません</strong>。
+だから 15 でも 16 でも、その場では出てこなかった。
+</p>
+
+<p>
+判定は追跡しなくてもできます。<strong>初期化行がどこに書いてあるかを見るだけ</strong>です。
+</p>
+
+<h2>2つのコードを並べる</h2>
+
+<p>どちらも「外側ループの中で内側ポインタを動かす」コードです。違いは1箇所しかありません。</p>
+
+<pre><code><strong>424. Character Replacement — O(n)</strong>
+
+left = 0                          <strong>← for の外</strong>
+for right in range(len(s)):
+    ...
+    while is_invalid():
+        left += 1</code></pre>
+
+<pre><code><strong>16. 3Sum Closest — O(n²)</strong>
+
+for i in range(len(nums)):
+    j, k = i + 1, len(nums) - 1   <strong>← for の中</strong>
+    while j &lt; k:
+        ...</code></pre>
+
+<p class="lead">
+<strong>内側ポインタの初期化行が、外側ループの外にあれば足し算。中にあれば掛け算。</strong>
+</p>
+
+<p>
+インデントを見るだけです。<code>left = 0</code> は左端に、<code>j, k = ...</code> は1段下がっている。
+<strong>これが計算量そのもの</strong>です。
+</p>
+
+<h2>なぜそれで決まるのか</h2>
+
+<table>
+  <thead><tr><th></th><th>424（外にある）</th><th>16（中にある）</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>内側ポインタは</td>
+      <td><code>left</code> は一度も戻らない</td>
+      <td><code>j, k</code> は毎回 <code>i+1, n-1</code> に戻る</td>
+    </tr>
+    <tr>
+      <td>内側の総仕事量</td>
+      <td><strong>プログラム全体で合計 n 回</strong><br>（0 から n まで進むだけ）</td>
+      <td><strong>1周ごとに n 回</strong><br>（毎回ゼロからやり直す）</td>
+    </tr>
+    <tr>
+      <td>数え方</td>
+      <td>外側 n + 内側 n ＝ <strong>足し算</strong></td>
+      <td>外側 n × 内側 n ＝ <strong>掛け算</strong></td>
+    </tr>
+    <tr>
+      <td>結論</td>
+      <td><code>O(n)</code></td>
+      <td><code>O(n²)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+「初期化行が外にある」＝「<strong>前の周の続きから始まる</strong>」＝「戻らない」。
+戻らないものは、全体でも n 回しか進めません。だから外側の回数と<strong>足せる</strong>。<br>
+「初期化行が中にある」＝「<strong>毎周ゼロから</strong>」。ゼロからなら毎回フルに走りうるので<strong>掛ける</strong>。
+</p>
+
+<div class="aside">
+  <span class="label">面接での言い方（これを丸ごと言えば通ります）</span>
+  <p>
+  「<code>j, k</code> の初期化が外側ループの<strong>内側</strong>にあるので、毎回リセットされます。
+  償却できないため掛け算で、<code>n × n = O(n²)</code>。<br>
+  ソートの <code>O(n log n)</code> はこれに<strong>吸収されます</strong>。」
+  </p>
+  <p>
+  「外側と内側でループが回るから <code>O(n²)</code>」は、<strong>424 でも同じことが言えてしまう</strong>ので
+  根拠になりません。面接官は必ずそこを突きます。
+  </p>
+</div>
+
+<h2>判定ドリル</h2>
+
+<p>コードだけを見て、<strong>足し算</strong>か<strong>掛け算</strong>かを答えてください。追跡しないこと。インデントだけ見る。</p>
+
+<div class="check" data-answer="足し算" data-alt="たしざん|足算|償却|O(n)">
+  <p class="check-q">
+    3. Longest Substring Without Repeating Characters<br>
+    <code>left = 0</code> / <code>for right in ...:</code> / <code>&nbsp;&nbsp;&nbsp;&nbsp;while s[right] in seen: left += 1</code>
+  </p>
+  <input class="check-in" type="text" placeholder="足し算 / 掛け算">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><strong>足し算。</strong><code>left = 0</code> が <code>for</code> の外。<code>left</code> は戻らないので全体で n 回 → <code>O(n)</code>。</p>
+</div>
+
+<div class="check" data-answer="掛け算" data-alt="かけざん|掛算|かけ算|O(n^2)|O(n²)">
+  <p class="check-q">
+    18. 4Sum（の内側2重）<br>
+    <code>for i in ...:</code> / <code>&nbsp;&nbsp;for j in ...:</code> / <code>&nbsp;&nbsp;&nbsp;&nbsp;l, r = j+1, n-1</code> / <code>&nbsp;&nbsp;&nbsp;&nbsp;while l &lt; r:</code>
+  </p>
+  <input class="check-in" type="text" placeholder="足し算 / 掛け算">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><strong>掛け算。</strong><code>l, r</code> の初期化が <code>for j</code> の中。よって <code>n² × n = O(n³)</code>。次の問題です。</p>
+</div>
+
+<div class="check" data-answer="足し算" data-alt="たしざん|足算|償却|O(n)">
+  <p class="check-q">
+    1004. Max Consecutive Ones III<br>
+    <code>left = zeros = 0</code> / <code>for right in ...:</code> / <code>&nbsp;&nbsp;&nbsp;&nbsp;while zeros &gt; k: left += 1</code>
+  </p>
+  <input class="check-in" type="text" placeholder="足し算 / 掛け算">
+  <button class="check-btn">確認</button>
+  <p class="check-fb"><strong>足し算。</strong>初期化が外。<code>while</code> が何重に見えても、<code>left</code> が戻らない限り総量は n。</p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">この判定法が壊れるのはどんなときか。</p>
+  <button class="quiz-opt" data-correct>内側ポインタが途中で前に戻される実装のとき</button>
+  <button class="quiz-opt">内側が for ではなく while で書かれているとき</button>
+  <button class="quiz-opt">外側のループが二重に入れ子になっているとき</button>
+  <button class="quiz-opt">内側で複数のポインタを同時に動かしているとき</button>
+  <p class="quiz-fb">
+  この判定が効くのは「<strong>初期化行が外 ⇒ 単調に進むだけ</strong>」という含意があるからです。
+  ループ内で <code>left</code> を減らす実装があれば、外に書いてあっても足し算は成り立ちません
+  （<a href="./0002-sliding-window.html">Lesson 02</a> の<strong>左端の単調性</strong>＝
+  <a href="../learning-records/0002-left-monotonicity.md">LR-0002</a>）。<br>
+  逆に言えば、<strong>単調性さえ確認すれば、あとはインデントだけで判定してよい</strong>。
+  </p>
+</div>
+
+<h2>おまけ：`⚠` に挙げた行の話</h2>
+
+<p>
+<code>if curr_diff &lt; min_diff</code> を挙げたのは正しい判断でした。危険なのは式ではなく<strong>時制</strong>です。
+</p>
+
+<pre><code>curr_diff = abs(target - three_sum)   # ← <strong>この時点の</strong> j, k
+if three_sum &lt; target:
+    j += 1                            # ← j が動く
+...
+if curr_diff &lt; min_diff:              # ← ここでの nums[j] は curr_diff の j <strong>ではない</strong>
+    best_sum = three_sum              # ← three_sum も移動前の値。だから正しい</code></pre>
+
+<p>
+<code>curr_diff</code> と <code>three_sum</code> を<strong>移動前に確定させている</strong>ので整合しています。
+ただし「更新をポインタ移動の後に書く」形は、後から1行足したときに壊れます。
+面接で言うなら「<strong>更新は移動前の値を使っているので、この2行は動かせません</strong>」。
+</p>
+
+<div class="aside">
+  <span class="label">より安全な形（好みの問題。今のままでも正しい）</span>
+  <p>
+  更新を移動の<strong>前</strong>に置くと、時制の依存が消えます。
+  </p>
+  <pre><code>three_sum = nums[i] + nums[j] + nums[k]
+if abs(target - three_sum) &lt; min_diff:    <strong>← 先に記録</strong>
+    min_diff = abs(target - three_sum)
+    best_sum = three_sum
+
+if three_sum &lt; target:   j += 1           <strong>← あとで移動</strong>
+elif three_sum &gt; target: k -= 1
+else: return three_sum</code></pre>
+</div>
+
+<h2>次</h2>
+
+<ol>
+  <li><strong>18. 4Sum</strong>。実装前パートと実装後パートに分けて、自由形式で答えてください
+      （<a href="../reference/interview-protocol.html">プロトコル</a>の新形式）。</li>
+  <li>実装前に言うこと：方針、<strong>この解法が要求する条件とそれを保証しているのは誰か</strong>、
+      <strong>捨ててよい理由</strong>。私は枠を出しません。</li>
+  <li>実装後に聞くこと：計算量（<strong>今日の判定法で</strong>）、いちばん自信のない行。</li>
+</ol>
+
+<h2>読むもの</h2>
+
+<p>
+<strong>主資料：</strong>
+<a href="https://en.wikipedia.org/wiki/Amortized_analysis#Aggregate_analysis">Amortized analysis — Aggregate method</a>。
+「個々の操作ではなく<strong>全体の総量を先に押さえてから割る</strong>」という数え方が、
+今日の「足し算」の正体です。日本語の整理は
+<a href="../lessons/0004-amortized-argument.html">Lesson 04</a> と
+<a href="../reference/glossary.html">用語集</a>に。
+</p>
+
+<p class="footer">
+分からないところは<strong>その場で聞いてください</strong>。私はあなたの教師です。<br>
+関連：<a href="./0010-preconditions.html">Lesson 10</a> ·
+<a href="./0009-nested-two-pointers.html">Lesson 09</a> ·
+<a href="./0004-amortized-argument.html">Lesson 04</a> ·
+<a href="../reference/interview-protocol.html">面接プロトコル</a>
+</p>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

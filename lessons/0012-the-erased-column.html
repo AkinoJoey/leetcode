@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 12 — ③は、消えた列の話</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+/* ペア空間の格子。③を「移動」ではなく「消えた領域」として見るための表示 */
+table.grid { border-collapse: collapse; font-family: var(--mono); font-size: .85rem; margin: 1.4rem 0; }
+table.grid th, table.grid td { border: 1px solid currentColor; padding: .45rem .6rem; text-align: center; opacity: .85; }
+table.grid th { font-weight: 600; opacity: .6; }
+table.grid td.now  { font-weight: 700; outline: 2px solid currentColor; }
+table.grid td.gone { background: currentColor; color: transparent; }
+table.grid td.gone::after { content: "✗"; color: canvas; font-weight: 700; }
+table.grid td.free { opacity: .3; }
+table.grid td.na   { border: 0; }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">Lesson 12 · Two Pointers</p>
+<h1>③は、消えた列の話</h1>
+<p class="subtitle">5回続けて②を書いています。原因が分かりました——<strong>③が何について語る文なのかが、ずれています</strong>。</p>
+
+<h2>あなたが毎回書いているもの</h2>
+
+<blockquote>
+<p>「ソート済の配列のため、<code>sum &gt; target</code> の場合、配列内の最大の値である <code>nums[d]</code> の
+インデックスを -1 することで、<strong>和を小さくすることが可能</strong>。そのため捨てても問題ない」</p>
+</blockquote>
+
+<p>
+この文が語っているのは<strong>ポインタの移動</strong>です。「どちらを、なぜその向きに動かすか」。
+それは正しく、そして<strong>②</strong>です。
+</p>
+
+<p class="lead">
+③が語るのは移動ではありません。<strong>移動した結果、視界から永久に消える組がどうなるか</strong>です。<br>
+主語が違います。②の主語はポインタ、<strong>③の主語は消えた組</strong>。
+</p>
+
+<p>
+5回の答案すべてに共通していたのは、<strong>消えた組が一度も名指しされていない</strong>ことでした。
+だから定型文（<code>捨てる X は…</code>）も形式規則（「〜ない」で終わる）も通り抜けてしまう。
+<strong>X が空欄のまま文だけ完成する</strong>からです。
+</p>
+
+<h2>消えるものを、絵にする</h2>
+
+<p>
+18. 4Sum で <code>a, b</code> を固定したとします。残った添字が <code>2〜7</code>、
+そこから <code>(c, d)</code> のペアを選ぶ。<strong>候補はこの格子の全マスです。</strong>
+</p>
+
+<table class="grid">
+  <tr><th></th><th>d=3</th><th>d=4</th><th>d=5</th><th>d=6</th><th>d=7</th></tr>
+  <tr><th>c=2</th><td class="free">·</td><td class="free">·</td><td class="free">·</td><td class="free">·</td><td class="now">✓</td></tr>
+  <tr><th>c=3</th><td class="na"></td><td class="free">·</td><td class="free">·</td><td class="free">·</td><td class="gone">x</td></tr>
+  <tr><th>c=4</th><td class="na"></td><td class="na"></td><td class="free">·</td><td class="free">·</td><td class="gone">x</td></tr>
+  <tr><th>c=5</th><td class="na"></td><td class="na"></td><td class="na"></td><td class="free">·</td><td class="gone">x</td></tr>
+  <tr><th>c=6</th><td class="na"></td><td class="na"></td><td class="na"></td><td class="na"></td><td class="gone">x</td></tr>
+</table>
+
+<p>
+<code>✓</code> がいま評価した <code>(2, 7)</code>。和は target を超えていたとします。
+ここで <code>d -= 1</code> を実行すると——<strong>いちばん右の列がまるごと消えます</strong>。
+</p>
+
+<p>
+消えるのは <code>(3,7) (4,7) (5,7) (6,7)</code>。<strong>4組です。</strong>
+<code>(2,7)</code> ではありません——それはもう見た。<strong>③が守るのは、この4組の分</strong>です。
+</p>
+
+<div class="aside">
+  <span class="label">③が主張しているのは、この4組についてだけ</span>
+  <p>
+  <code>·</code> のマスは捨てていません。<code>d</code> が 6 に来れば、まだ全部届きます。<br>
+  <strong>③は「解が存在しない」という強い主張ではなく、「消えた分には無い」という弱い主張</strong>
+  （<a href="../learning-records/0012-bound-not-value.md">LR-0012</a>）。
+  弱いからこそ、たった一文で証明できます。
+  </p>
+</div>
+
+<h2>絵から③を読む（4行）</h2>
+
+<ol>
+  <li><code>✗</code> はどれも <code>✓</code> より<strong>下の行</strong> ＝ <code>c</code> の添字が大きい</li>
+  <li><strong>ソート順より</strong> <code>nums[c'] ≥ nums[c]</code>。<code>d</code> は共通。
+      よって <code>✗</code> の和は、どれも <code>✓</code> の和<strong>以上</strong></li>
+  <li><code>✓</code> の和は<strong>すでに target を超えていた</strong></li>
+  <li>ゆえに <code>✗</code> のどれも target に<strong>ならない</strong></li>
+</ol>
+
+<p>
+4行目が③です。<strong>「和を小さくできる」は一度も出てきません。</strong>
+出てくるのは、消えた組・ソート順・そして超えていたという事実の3つだけ。
+</p>
+
+<h2>手順にします</h2>
+
+<p>③を書くときは、いきなり文を書かない。<strong>先に2つ、名指しする。</strong></p>
+
+<ol>
+  <li><strong>いま消えたのは、どの組か</strong>（添字で。1組ではなく<em>集合</em>で）</li>
+  <li><strong>その全部が、手元の値と比べてどうなるか</strong>（根拠はソート順 or min or 添字）</li>
+</ol>
+
+<p>
+この2つが埋まれば、③は「よって、それらは【目標】に達し<strong>ない</strong>」で閉じるだけです。
+<strong>1が書けないうちに③を書こうとすると、必ず②になります</strong>——書ける材料が移動の話しか無いからです。
+</p>
+
+<h2>ドリル：消えた組を名指しする</h2>
+
+<p>③は聞きません。<strong>消える組だけ</strong>答えてください。</p>
+
+<div class="check" data-answer="(2,7)(2,6)(2,5)(2,4)" data-alt="(2,4)(2,5)(2,6)(2,7)|(2,4),(2,5),(2,6),(2,7)|(2,7),(2,6),(2,5),(2,4)|c=2の行全部|c=2の行">
+  <p class="check-q">
+    上と同じ格子で、いま <code>(2,3)</code> を見ていて和が<strong>小さすぎた</strong>ので <code>c += 1</code> した。
+    消える組をすべて（例: <code>(2,4)(2,5)</code> のように）
+  </p>
+  <input class="check-in" type="text" placeholder="(  ,  )( ,  ) ...">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  <strong><code>(2,4) (2,5) (2,6) (2,7)</code> ＝ <code>c=2</code> の行まるごと。</strong>
+  <code>d</code> を動かしたときは<strong>列</strong>が、<code>c</code> を動かしたときは<strong>行</strong>が消えます。
+  そして消えるのは常に<strong>まだ見ていない側</strong>だけ。
+  </p>
+</div>
+
+<div class="check" data-answer="4" data-alt="4組|4つ|four">
+  <p class="check-q">
+    167. Two Sum II で <code>arr = [1,3,5,7,9,11]</code>、<code>left=0, right=5</code> を見て和が大きすぎた。
+    <code>right -= 1</code> で消える組は何組か（数字だけ）
+  </p>
+  <input class="check-in" type="text" placeholder="数字">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+  <strong>4組。</strong><code>(1,5) (2,5) (3,5) (4,5)</code>。<code>(0,5)</code> は評価済みなので含みません。
+  <code>arr[5]=11</code> を右端に持つ組は、これで全滅します。
+  </p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">③の文の主語として正しいのはどちらか。</p>
+  <button class="quiz-opt" data-correct>いま視界から消えた、まだ見ていない組の全部</button>
+  <button class="quiz-opt">いま評価を終えたばかりの、手元にある組</button>
+  <button class="quiz-opt">これから評価する予定の、残っている組の全部</button>
+  <button class="quiz-opt">配列の中で最大の値を持つ、両端にある要素</button>
+  <p class="quiz-fb">
+  <strong>消えた、まだ見ていない組。</strong>「評価を終えた組」は捨てていません（もう答えに反映済み）。
+  「残っている組」はこれから見るので③の対象外。
+  <strong>③が守る範囲は、たったいま失った分だけ</strong>です。
+  </p>
+</div>
+
+<h2>18 の③（あなたが書くもの）</h2>
+
+<p>
+上の手順で、<code>a, b</code> 固定・<code>sum &gt; target</code> の場合の③を一文で書いてください。
+材料はすべて出揃っています。<strong>「小さくできる」が入っていたら②です。</strong>
+</p>
+
+<p>
+書けたら、そのまま実装へ。<code>a, b</code> の2重ループ・<code>c, d</code> の両端・重複スキップ、
+そして計算量は <a href="./0011-indentation-decides.html">Lesson 11</a> の判定法を<strong>2回適用</strong>します。
+</p>
+
+<h2>読むもの</h2>
+
+<p>
+<strong>主資料：</strong>
+<a href="https://leetcode.com/problems/4sum/editorial/">4Sum — LeetCode 公式 editorial</a>。
+<code>kSum</code> への一般化（4Sum は 3Sum を n 回、3Sum は 2Sum を n 回）が書かれており、
+<a href="./0009-nested-two-pointers.html">Lesson 09</a> の「帰着」の見方がそのまま <code>k</code> 段に伸びます。
+</p>
+
+<p class="footer">
+分からないところは<strong>その場で聞いてください</strong>。私はあなたの教師です。<br>
+関連：<a href="./0011-indentation-decides.html">Lesson 11</a> ·
+<a href="./0010-preconditions.html">Lesson 10</a> ·
+<a href="../reference/two-pointers-template.html">Two Pointers テンプレート</a> ·
+<a href="../reference/interview-protocol.html">面接プロトコル</a>
+</p>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/input-check.js"></script>
+</body>
+</html>
