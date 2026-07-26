@@ -277,6 +277,37 @@ for i in range(len(nums) - 2):
   外側が固定されていれば、<strong>1つの左の値に対して和が一致する右の値は高々1つ</strong>なので、
   右側の重複は自動的に潰れる。
   </p>
+  <p>
+  <strong>理由：<code>i</code> と <code>j</code> の値が決まれば、<code>nums[k] = target - nums[i] - nums[j]</code> は
+  値として一意に決まる。</strong>三つ組は3つの値で決まるのだから、<strong>2つが決まれば3つ目は自由度ゼロ</strong>。
+  よって <code>(i, j)</code> の値の組が重複しなければ、三つ組も重複しない。
+  <strong>右側を弾く仕事は残っていない。</strong>
+  </p>
+</div>
+
+<div class="aside">
+  <span class="label">break してよい条件（15 で1回、18 で1回まちがえた）</span>
+  <p>
+  <strong><code>break</code> は「このループの残り<em>全部</em>が不要」と証明できるときだけ。</strong>
+  1件の事実からは <code>break</code> できない。
+  </p>
+  <table>
+    <thead><tr><th></th><th>言えていること</th><th>可否</th></tr></thead>
+    <tbody>
+      <tr><td><code>if nums[i] &gt; 0: break</code></td>
+          <td>ソート順より、以降の <code>i'</code> はすべて <code>nums[i'] &gt; 0</code>。
+              3つとも正なので和は絶対に 0 にならない ＝ <strong>残り全部について</strong>言えている</td>
+          <td><strong>可</strong></td></tr>
+      <tr><td>一致したので <code>break</code>（15 の初回）</td>
+          <td>いま1組見つかった、それだけ。<strong>残りについて何も言えていない</strong>
+              （167 は「1つ返せ」なので可、15 は「全部返せ」なので不可）</td>
+          <td><strong>不可</strong></td></tr>
+    </tbody>
+  </table>
+  <p>
+  <strong>内側ループの止め方は、外側の問題文が決める</strong>（→ <a href="../lessons/0009-nested-two-pointers.html">Lesson 09</a>）。
+  同じ <code>break</code> でも、根拠が「順序」なら可、「1件の発見」なら不可。
+  </p>
 </div>
 
 <h2>5. Python の地雷</h2>
