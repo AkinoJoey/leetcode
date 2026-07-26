@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference — Binary Search テンプレート</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+table.rule td.k { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
+table.rule tr.bad td { background: color-mix(in srgb, var(--ng) 12%, transparent); }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">Reference · Binary Search</p>
+<h1>Binary Search テンプレート</h1>
+<p class="subtitle">初出：<a href="../lessons/0014-the-rate-not-the-reason.html">Lesson 14</a>。迷ったらここに戻る。</p>
+
+<h2>1. 前提（⓪）</h2>
+
+<ul>
+  <li><strong>ソート済みであること</strong>。保証しているのは<strong>問題文</strong>か、<strong>自分の <code>sort()</code></strong> か——毎回どちらかを言う。</li>
+  <li>自分でソートするなら <code>O(n log n)</code> に飲まれる。<strong>探索が1回だけなら、線形探索と変わらない。</strong>元が取れるのは探索が何度も走るとき。</li>
+  <li>「ソート済み」でなくてもよい場合がある：<strong>判定が単調</strong>（ある境界より前は全部 False、後は全部 True）なら二分探索できる。配列でなくてもよい（答えの値域を二分する）。</li>
+</ul>
+
+<h2>2. 不変条件（③の主語）</h2>
+
+<blockquote>答えが存在するなら、それは常に <code>[left, right]</code> の中にある。</blockquote>
+
+<p>
+③ を書く手順は two pointers と同じ：<strong>先に消える区間を名指し、次に理由</strong>。
+</p>
+
+<ul>
+  <li>名指し：「捨てるのは <code>left..mid</code> の区間です」</li>
+  <li>理由：「ソート順より、そこは<strong>全部</strong> target 未満だからです」</li>
+</ul>
+
+<p>「小さいほうを動かします」は②（手順）であって③（理由）ではない。</p>
+
+<h2>3. 型 A：厳密一致（704 型）</h2>
+
+<pre><code>def search(nums, target):
+    left, right = 0, len(nums) - 1     # 閉区間 [left, right]
+    while left &lt;= right:
+        mid = (left + right) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1</code></pre>
+
+<h3>三つの決め事は連動する</h3>
+
+<table class="rule">
+  <tr><th>区間の取り方</th><th>while</th><th>更新</th></tr>
+  <tr><td class="k">[left, right] 閉区間</td><td class="k">left &lt;= right</td><td class="k">mid + 1 / mid - 1</td></tr>
+  <tr><td class="k">[left, right) 半開区間</td><td class="k">left &lt; right</td><td class="k">mid + 1 / mid</td></tr>
+  <tr class="bad"><td class="k">[left, right] 閉区間</td><td class="k">left &lt;= right</td><td class="k">mid（±1 なし）→ 無限ループ</td></tr>
+</table>
+
+<p>
+<strong>一つ変えたら三つとも見直す。</strong>閉区間で <code>left = mid</code> と書くと、
+<code>left=3, right=4</code> で <code>mid = 3</code>、<code>left</code> が動かず止まらない。
+</p>
+
+<div class="aside">
+  <span class="label">提出前チェック（必ず手で回す）</span>
+  <p>
+  <strong>要素が2つ隣り合った状態</strong>（<code>right == left + 1</code>）で1周させ、
+  <strong>範囲が真に狭まるか</strong>を確かめる。二分探索のバグはほぼ全部ここに出る。
+  </p>
+</div>
+
+<h2>4. 型 B：境界を探す（lower / upper bound）</h2>
+
+<p>
+面接で本当によく出るのはこちら。「<strong>条件を満たす最小の添字</strong>」を返す形。
+<code>==</code> で早期 return せず、<strong>最後まで詰める</strong>のが型 A との違い。
+</p>
+
+<pre><code>def lower_bound(nums, target):
+    """nums[i] &gt;= target となる最小の i。無ければ len(nums)。"""
+    left, right = 0, len(nums)          # 半開区間 [left, right)
+    while left &lt; right:
+        mid = (left + right) // 2
+        if nums[mid] &lt; target:
+            left = mid + 1              # mid は条件を満たさない → 捨てる
+        else:
+            right = mid                 # mid は候補として残す
+    return left                         # left == right が答え</code></pre>
+
+<ul>
+  <li><code>right = mid</code> であって <code>mid - 1</code> ではない。<strong><code>mid</code> 自身がまだ答えの候補</strong>だから。</li>
+  <li>返すのは <code>left</code>。ループを抜けた時点で <code>left == right</code>、そこが境界。</li>
+  <li><code>&lt;</code> を <code>&lt;=</code> に変えると <strong>upper bound</strong>（<code>&gt; target</code> となる最小の添字）になる。</li>
+</ul>
+
+<p>
+標準ライブラリの
+<a href="https://docs.python.org/3/library/bisect.html"><code>bisect_left</code> / <code>bisect_right</code></a>
+がこれそのもの。ドキュメントの保証：
+<code>bisect_left</code> の返り値 <code>ip</code> について <code>a[lo:ip]</code> は全部 <code>&lt; x</code>、<code>a[ip:hi]</code> は全部 <code>&gt;= x</code>。
+<strong>リストがソート済みであることは確認しない</strong>（"assuming that <em>a</em> is already sorted"）——前提は呼び出し側の責任。
+</p>
+
+<pre><code>from bisect import bisect_left, bisect_right
+
+i = bisect_left(nums, x)                  # x を挿入できる最も左の位置
+found = i &lt; len(nums) and nums[i] == x    # 存在判定はこの一行が必要
+cnt = bisect_right(nums, x) - bisect_left(nums, x)   # x の個数</code></pre>
+
+<h2>5. 計算量（⑥）の言い方</h2>
+
+<blockquote>
+毎回、<strong>残っている範囲の半分</strong>を捨てる。<code>n → n/2 → n/4 → … → 1</code> なので
+<code>n / 2^k = 1</code>、すなわち <code>k = log₂ n</code> 回。よって <code>O(log n)</code>。空間は <code>O(1)</code>。
+</blockquote>
+
+<ul>
+  <li><strong>「ソート済みだから log n」は誤り。</strong>ソート済みは<strong>捨てる権利</strong>を与えるだけで、速さを与えない
+      （two pointers も同じ前提で <code>O(n)</code>）。<code>log</code> を生むのは<strong>率</strong>。</li>
+  <li><code>log</code> が出る場所は常に「<strong>何回で 1 になるか</strong>」を数えたとき。</li>
+  <li>再帰で書くと空間は <code>O(log n)</code>（スタック）。<strong>反復なら <code>O(1)</code></strong>——書き方で変わるので言い分ける。</li>
+  <li>自分で <code>sort()</code> したなら <code>O(n log n)</code>。<strong>1行目から数える</strong>
+      （<a href="../lessons/0013-count-from-line-one.html">Lesson 13</a>）。</li>
+</ul>
+
+<h2>6. 頻出バグ一覧</h2>
+
+<table class="rule">
+  <tr><th>症状</th><th>原因</th><th>直し方</th></tr>
+  <tr><td>無限ループ</td><td class="k">閉区間で left = mid</td><td>閉区間なら必ず <code>mid ± 1</code>／候補を残したいなら半開区間へ</td></tr>
+  <tr><td>1個だけ見落とす</td><td class="k">while left &lt; right（閉区間）</td><td>閉区間なら <code>&lt;=</code>。<code>left == right</code> はまだ1個残っている</td></tr>
+  <tr><td>空配列で例外</td><td class="k">right = len(nums) - 1 が -1</td><td><code>while</code> の条件が最初から偽になるので実は安全。<strong>手で1回確かめる</strong></td></tr>
+  <tr><td>境界問題で答えがずれる</td><td class="k">== で早期 return</td><td>境界を探す型では早期 return しない。最後まで詰めて <code>left</code> を返す</td></tr>
+</table>
+
+<p class="footer">
+関連：<a href="../lessons/0014-the-rate-not-the-reason.html">Lesson 14</a> ·
+<a href="./two-pointers-template.html">Two Pointers テンプレート</a> ·
+<a href="./interview-protocol.html">面接プロトコル</a> ·
+<a href="./glossary.html">用語集</a> ·
+<a href="./boundary-checklist.html">境界チェックリスト</a>
+</p>
+
+</body>
+</html>

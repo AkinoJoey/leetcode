@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 14 — 率であって、理由ではない</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+/* 縮小の階段。log を「回数を数える」形で見せるための表示 */
+table.shrink td.n { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
+table.shrink tr.total td { border-bottom: none; border-top: 2px solid var(--rule); font-weight: 600; }
+/* 冒頭の retrieval を、本編と視覚的に切り離す */
+.recall { border: 1px solid var(--rule); border-radius: 5px; padding: 1.2rem 1.3rem .6rem; margin: 2rem 0 3rem; }
+.recall > .label { font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: .6rem; }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">Lesson 14 · 新しい型：binary search</p>
+<h1>率であって、理由ではない</h1>
+<p class="subtitle">Lesson 07〜08 で「two pointers は log n ではない」と強く否定しました。今日はその<strong>否定形の相方</strong>——では、いつ log n になるのか。</p>
+
+<div class="recall">
+  <span class="label">まず思い出す（前々回より前の問題から）</span>
+  <div class="quiz">
+    <p class="quiz-q">11. Container With Most Water。短いほうの板を動かすとき、捨てた組について言えることは？</p>
+    <button class="quiz-opt" data-correct>その板が面積の上限を決めており、幅は減る一方だから</button>
+    <button class="quiz-opt">その板を含む組はすでに評価済みで、見る必要がないから</button>
+    <button class="quiz-opt">その板の値が最小なので、面積の値も最小になると決まるから</button>
+    <button class="quiz-opt">その板より低い板は残っておらず、以降は増える一方だから</button>
+    <p class="quiz-fb">
+      捨てているのは<strong>値ではなく上限</strong>です（<a href="../learning-records/0012-bound-not-value.md">LR-0012</a>）。
+      「小さいから捨てる」ではありません——その板を含む組は<strong>全部まとめて</strong>、今の面積を超えられないと<em>証明</em>できるから捨てる。
+      これが「捨ててよい<strong>理由</strong>」です。今日は、この理由のとなりにあるもう一つの量を扱います。
+    </p>
+  </div>
+</div>
+
+<p class="lead">
+two pointers も binary search も、毎回何かを捨てます。捨てる<strong>理由</strong>はどちらも同じ——ソート順による証明です。<br>
+違うのは<strong>率</strong>。two pointers は毎回<strong>1個</strong>、binary search は毎回<strong>半分</strong>。<br>
+<strong>log n を生むのは理由ではなく率です。</strong>
+</p>
+
+<h2>1. 同じ理由、違う率</h2>
+
+<p>
+<a href="../learning-records/0011-discard-rate-vs-discard-reason.md">LR-0011</a> で、
+「捨てるから速い」という言い方が雑すぎることを扱いました。伏線をここで回収します。
+</p>
+
+<table>
+  <tr><th></th><th>捨てる理由</th><th>1回あたり捨てる量</th><th>回数</th></tr>
+  <tr><td>two pointers</td><td>ソート順による証明</td><td>1行 or 1列（＝定数個の"組"ではなく、残り <code>n</code> 個中の <strong>1個</strong>）</td><td><code>n</code></td></tr>
+  <tr><td>binary search</td><td>ソート順による証明</td><td>残っている範囲の <strong>半分</strong></td><td><code>log n</code></td></tr>
+</table>
+
+<p>
+理由の欄は<strong>まったく同じ</strong>です。だから「ソート済みだから log n」は誤りになります。
+ソート済みは<strong>捨てる権利</strong>を与えるだけで、<strong>速さは与えません</strong>。
+速さを決めるのは、その権利を使って<strong>一度にどれだけ捨てるか</strong>のほうです。
+</p>
+
+<div class="aside">
+  <span class="label">Lesson 07〜08 との接続</span>
+  <p>
+  あのときのギャップ論法は「two pointers では、ポインタが毎回<strong>1つずつ</strong>しか動かないので、
+  合計 <code>n</code> 回で終わる＝ <code>log</code> にはならない」でした。
+  今日の言い方に直すと：<strong>率が <code>1/n</code> だから線形</strong>。
+  否定形（<a href="./0007-two-pointers.html">Lesson 07</a>）と肯定形（今日）は、同じ一本の軸の両端です。
+  </p>
+</div>
+
+<h3>なぜ「半分」が log になるのか</h3>
+
+<p>捨てたあとに<strong>残る</strong>個数だけを、上から書き下します。</p>
+
+<table class="shrink">
+  <tr><th>ステップ</th><th>残っている個数</th></tr>
+  <tr><td>0</td><td class="n">n</td></tr>
+  <tr><td>1</td><td class="n">n / 2</td></tr>
+  <tr><td>2</td><td class="n">n / 4</td></tr>
+  <tr><td>k</td><td class="n">n / 2<sup>k</sup></td></tr>
+  <tr class="total"><td>終了条件</td><td class="n">n / 2<sup>k</sup> = 1　⟹　k = log₂ n</td></tr>
+</table>
+
+<p>
+数えているのは<strong>ステップ数 k</strong> であって、要素数ではありません。
+<code>log</code> が出てくる場所は<strong>常にここ</strong>——「何回で 1 になるか」を数えたときだけです。
+</p>
+
+<div class="check" data-answer="10" data-alt="10回|log2(1024)">
+  <p class="check-q"><code>n = 1024</code>。毎回ちょうど半分を捨てるとき、範囲が 1 になるまで最悪で何回かかりますか（数字だけ）。</p>
+  <input class="check-in" type="text" placeholder="回数">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+    <strong>10</strong>。<code>2<sup>10</sup> = 1024</code> だから。
+    面接では「<code>n</code> が10億でも30回ちょっと」と言えると強い——
+    <code>log</code> の実感が伴っている合図になります。
+  </p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">二分探索が <code>O(log n)</code> になる根拠として、いちばん正確なのは？</p>
+  <button class="quiz-opt" data-correct>毎回、残っている範囲の一定の割合を捨てているから</button>
+  <button class="quiz-opt">配列がソート済みで、捨ててよい理由が保証されるから</button>
+  <button class="quiz-opt">毎回、範囲の端から要素を一つずつ捨てているから</button>
+  <button class="quiz-opt">探索の途中で答えが見つかれば、早く終了できるから</button>
+  <p class="quiz-fb">
+    <strong>一定の割合</strong>です。「ソート済みだから」は two pointers にも当てはまってしまうので、
+    <code>log n</code> の説明になりません（<a href="../learning-records/0016-indentation-decides.md">LR-0016</a> と同じ検査：
+    <strong>その説明は、別の解法にも当てはまってしまわないか</strong>）。
+    「早く見つかれば」は<strong>最良</strong>の話で、計算量は最悪を言います。
+  </p>
+</div>
+
+<h2>2. 何を捨てたのか、名指しする</h2>
+
+<p>
+③（捨ててよい理由）の主語は<strong>消えた組</strong>でした
+（<a href="../learning-records/0017-subject-of-the-claim.md">LR-0017</a>）。二分探索でも同じです。主語は<strong>消えた区間</strong>。
+</p>
+
+<p>二分探索の不変条件は、たった一文です。</p>
+
+<blockquote>答えが存在するなら、それは常に <code>[left, right]</code> の中にある。</blockquote>
+
+<p>
+毎回の更新は、この一文を<strong>壊さないまま</strong>範囲を狭める操作です。
+<code>nums[mid] &lt; target</code> なら、ソート順より <code>nums[left..mid]</code> は<strong>全部</strong> target 未満——
+だから <code>left = mid + 1</code>。捨てたのは「<code>mid</code> 以下の添字の区間<strong>まるごと</strong>」です。
+</p>
+
+<div class="aside">
+  <span class="label">③ の書き方（two pointers と同じ手順）</span>
+  <p>
+  <strong>先に集合を名指しする</strong>：「捨てるのは <code>left..mid</code> の区間です」。<br>
+  <strong>次に理由</strong>：「ソート順より、そこは全部 target 未満だからです」。<br>
+  この順番です。「小さいほうを動かします」だけでは、③ ではなく ② になります。
+  </p>
+</div>
+
+<h2>3. 三つの決め事と、終わることの証明</h2>
+
+<pre><code>def search(nums, target):
+    left, right = 0, len(nums) - 1      # ← 決め事1：閉区間 [left, right]
+    while left &lt;= right:                # ← 決め事2：空になるまで
+        mid = (left + right) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[mid] &lt; target:
+            left = mid + 1              # ← 決め事3：mid は評価済み。含めない
+        else:
+            right = mid - 1
+    return -1</code></pre>
+
+<p>
+三つは<strong>独立に選べません</strong>。閉区間 <code>[left, right]</code> を選んだ時点で、
+<code>while</code> は <code>&lt;=</code>（<code>left == right</code> はまだ「1個残っている」状態）、
+更新は <code>mid ± 1</code>（<code>mid</code> は今まさに評価したので、範囲に残す理由がない）——と決まります。
+<strong>一つ変えたら三つとも見直す。</strong>
+</p>
+
+<div class="quiz">
+  <p class="quiz-q">更新を <code>left = mid</code> に変えたとき（他はそのまま）、何が起きますか？</p>
+  <button class="quiz-opt" data-correct>left と right が隣り合ったとき、範囲が狭まらなくなる</button>
+  <button class="quiz-opt">答えの候補を一つ飛び越してしまい、見落としが起きる</button>
+  <button class="quiz-opt">範囲が空になったあとに、もう一度だけ余計に評価する</button>
+  <button class="quiz-opt">mid の計算で桁があふれ、添字が負の値に回り込む</button>
+  <p class="quiz-fb">
+    <strong>無限ループ</strong>です。<code>left = 3, right = 4</code> のとき <code>mid = (3+4)//2 = 3</code>。
+    <code>left = mid</code> は <code>left = 3</code> ——<strong>何も変わらない</strong>まま次の周回に入ります。<br>
+    ここが二分探索で最も多いバグです。<strong>「毎回、範囲が真に狭まるか」を、隣接した2要素で必ず確かめる。</strong>
+    <a href="../learning-records/0004-off-by-one-dominant.md">LR-0004</a>（あなたの誤りの最大分類は off-by-one）の、この型での現れ方です。
+  </p>
+</div>
+
+<div class="aside">
+  <span class="label">Python では起きないバグ</span>
+  <p>
+  C や Java では <code>(left + right)</code> が桁あふれするため <code>left + (right - left) // 2</code> と書きます。
+  <strong>Python の整数は多倍長なので、この心配は不要</strong>です。
+  面接で聞かれたら「Python では不要ですが、固定長整数の言語では <code>left + (right-left)//2</code> にします」と答えれば十分。
+  <strong>覚える対象ではなく、聞かれたときの一言</strong>として持っておいてください。
+  </p>
+</div>
+
+<h2>4. 前提（⓪）は、誰が保証しているか</h2>
+
+<p>
+<a href="../learning-records/0015-preconditions-are-invisible.md">LR-0015</a> の形をそのまま使います。
+二分探索の前提は<strong>ソート済みであること</strong>。ただし今回、保証しているのは<strong>問題文</strong>です
+——15 や 18 のように、あなたのコードが <code>sort()</code> して作る前提ではありません。
+</p>
+
+<p>
+ここは Python の標準ライブラリも同じ立場を取っています。
+<a href="https://docs.python.org/3/library/bisect.html"><code>bisect</code> モジュール</a>のドキュメントは、
+リストがソート済みであることを<strong>前提として要求するだけで、確認も並べ替えもしない</strong>と明記しています
+（"assuming that <em>a</em> is already sorted"）。<strong>前提は呼び出し側の責任</strong>、という設計です。
+</p>
+
+<div class="aside">
+  <span class="label">⑥ への影響（前回の台帳と接続）</span>
+  <p>
+  <a href="./0013-count-from-line-one.html">Lesson 13</a> の規則は「⑥は1行目から上から順に読む」でした。
+  704 では<strong>1行目に <code>sort()</code> がありません</strong>——だから <code>O(log n)</code> がそのまま残ります。
+  もし自分で <code>sort()</code> していたら <code>O(n log n)</code> に飲まれ、<strong>二分探索した意味が消える</strong>。
+  「ソートしてから二分探索」は、<strong>探索が何度も走るときだけ</strong>元が取れます。
+  </p>
+</div>
+
+<h2>今日の課題</h2>
+
+<p>
+<a href="https://leetcode.com/problems/binary-search/">704. Binary Search</a> を、いつもの新形式で。
+</p>
+
+<p><strong>実装前</strong>（自由記述、コードを書く前に）：</p>
+<ol>
+  <li><strong>⓪</strong> この解法が成り立つために必要な条件と、それを保証しているのは誰か</li>
+  <li><strong>②</strong> 素朴解と、<strong>そのボトルネック</strong>（素朴解に出てくる語をそのまま含める）</li>
+  <li><strong>③</strong> <code>nums[mid] &lt; target</code> のとき<strong>消える区間</strong>は何か。先に名指し、次に理由</li>
+</ol>
+
+<p><strong>実装後</strong>：</p>
+<ol>
+  <li><strong>⑥</strong> 時間と空間。<strong>1行目から</strong>。<code>log</code> が出てくる根拠を<strong>率</strong>で言うこと</li>
+  <li><strong>⚠</strong> まだ一度も壊れたことのない行を1つ、危ないと思う理由つきで</li>
+</ol>
+
+<p>
+それと、口頭で1問。<br>
+<strong>「なぜ two pointers は <code>O(n)</code> で、二分探索は <code>O(log n)</code> なのですか。どちらもソート済み配列を使うのに」</strong>
+——これは面接で実際に飛んでくる形の質問です。今日の1章がそのまま答えになります。
+</p>
+
+<h2>読むもの</h2>
+
+<p>
+<strong>主資料：</strong>
+<a href="https://docs.python.org/3/library/bisect.html">Python 公式ドキュメント — <code>bisect</code></a>。
+<code>bisect_left</code> と <code>bisect_right</code> が返す<strong>「挿入位置」</strong>の定義、
+とくに二つの関数が保証する<strong>分割の条件</strong>（左側は全部 <code>&lt; x</code> / 右側は全部 <code>&gt;= x</code>）を読んでください。
+今日の不変条件と同じことを、標準ライブラリの言葉で書いたものです。
+自分で書く二分探索も、最終的にはこの二つのどちらかに帰着します。
+</p>
+
+<p class="footer">
+分からないところは<strong>その場で聞いてください</strong>。私はあなたの教師です。<br>
+関連：<a href="./0007-two-pointers.html">Lesson 07</a> ·
+<a href="./0013-count-from-line-one.html">Lesson 13</a> ·
+<a href="../reference/binary-search-template.html">Binary Search テンプレート</a> ·
+<a href="../reference/interview-protocol.html">面接プロトコル</a> ·
+<a href="../reference/glossary.html">用語集</a>
+</p>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/input-check.js"></script>
+</body>
+</html>
