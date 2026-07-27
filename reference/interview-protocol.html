@@ -272,9 +272,17 @@
   </p>
   <p>
   <code>⚠ いちばん自信のない行</code> が最も価値が高い。ここが次のレッスンの題材になる。<br>
-  <strong>条件：このセッションでまだ一度も議論していない行から選ぶ</strong>
-  （2026-07-26 追加）。直したばかりの行を挙げるのは予測ではなく<strong>回想</strong>で、
+  <strong>条件：今日いちばん自信のない<em>判断</em>をした行を選ぶ</strong>
+  （2026-07-27 改訂）。直したばかりの行を挙げるのは予測ではなく<strong>回想</strong>で、
   この欄の価値（まだ検証されていない場所を当てる）が失われる。
+  </p>
+  <p>
+  <strong>「危なそうな行」ではなく「迷った行」。</strong>
+  704 では <code>while l &lt;= r</code>（典型的な事故箇所だが迷っていない）を挙げ、
+  実際の急所だった<strong>更新行</strong>を外した（<a href="../learning-records/0020-the-rate-must-be-in-the-code.md">LR-0020</a>）。
+  一般に危ない行は<strong>知識</strong>から出るが、この欄が捕まえたいのは<strong>あなたの迷い</strong>——
+  7回連続で的中していた時期は、迷った行を挙げていた。<br>
+  なお「まだ一度も壊れたことのない行」は、日が空くと何を議論したか思い出せず判定できない（LR-0019）。
   </p>
 </div>
 
@@ -371,8 +379,34 @@
         上限が1つなら <code>min</code> は不要（問題3は必要、424 は不要）。</li>
     <li><strong>素朴解に主役が出てこない。</strong>最適解の主要な量（424 なら <code>max_freq</code>）が
         素朴解に登場しないなら、素朴解が間違っている。</li>
+    <li><strong>言った量が、コードのどの行にも無い。</strong>下の照合を最後に必ず1回。</li>
   </ul>
 </div>
+
+<h3>⑥と実装の照合（提出前に1回）</h3>
+
+<p>
+⓪で使っている形——<strong>前提と、それを保証している行を名指しする。名指しできなければ、その行はまだ存在しない</strong>
+（<a href="../learning-records/0015-preconditions-are-invisible.md">LR-0015</a>）——を⑥にも適用します。
+</p>
+
+<blockquote>
+<strong>⑥で「毎回 X 捨てる」「各反復は O(Y)」と言ったら、それを実現している行を指す。<br>
+指せなければ、その行はまだ存在しない。</strong>
+</blockquote>
+
+<table>
+  <tr><th></th><th>⑥で言ったこと</th><th>実際の行</th><th>結果</th></tr>
+  <tr><td>704</td><td>毎回<strong>半分</strong>捨てる</td><td><code>left += 1</code></td>
+      <td><strong>実測 <code>O(n)</code>。しかも LeetCode は通る</strong>（<a href="../learning-records/0020-the-rate-must-be-in-the-code.md">LR-0020</a>）</td></tr>
+  <tr><td>125</td><td><code>O(n)</code> メモリを避けた</td><td><code>s = s.lower()</code></td>
+      <td>新しい文字列を作っているので <code>O(n)</code>（<a href="../learning-records/0013-two-kinds-of-discard.md">LR-0013</a>）</td></tr>
+</table>
+
+<p>
+どちらも<strong>テストは通ります</strong>。正しさは速さを強制しないので、
+主張と実装がずれても<strong>症状が出ない</strong>——だから提出前の照合でしか捕まりません。
+</p>
 
 <h2>言ってはいけないこと / 言うべきこと</h2>
 

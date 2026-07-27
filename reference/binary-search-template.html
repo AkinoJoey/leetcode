@@ -127,7 +127,37 @@ cnt = bisect_right(nums, x) - bisect_left(nums, x)   # x の個数</code></pre>
   <li>再帰で書くと空間は <code>O(log n)</code>（スタック）。<strong>反復なら <code>O(1)</code></strong>——書き方で変わるので言い分ける。</li>
   <li>自分で <code>sort()</code> したなら <code>O(n log n)</code>。<strong>1行目から数える</strong>
       （<a href="../lessons/0013-count-from-line-one.html">Lesson 13</a>）。</li>
+  <li>「半分に<strong>できる</strong>」ではなく「毎回<strong>必ず</strong>半分に<strong>なる</strong>」。
+      更新行は条件分岐のどちらを通っても実行されるので、可能性ではなく確定。</li>
 </ul>
+
+<h3>言った率を、行で名指しする</h3>
+
+<p>
+⓪で使っている形（前提と、<strong>それを保証している行の名指し</strong>。名指しできなければ、その行はまだ存在しない）を
+そのまま⑥に適用します。
+</p>
+
+<blockquote>
+<strong>⑥で「毎回 X 捨てる」と言ったら、X を実現している行を指す。指せなければ、その行はまだ存在しない。</strong>
+</blockquote>
+
+<table class="rule">
+  <tr><th>⑥で言ったこと</th><th>それを実現している行</th><th>実際の計算量</th></tr>
+  <tr><td>毎回 <strong>半分</strong>捨てる</td><td class="k">left = mid + 1 / right = mid - 1</td><td><code>O(log n)</code></td></tr>
+  <tr class="bad"><td>毎回 <strong>半分</strong>捨てる（と言ったが）</td><td class="k">left += 1 / right -= 1</td><td><strong><code>O(n)</code>。主張と実装が別物</strong></td></tr>
+</table>
+
+<div class="aside">
+<span class="label">落ちないバグ</span>
+<p>
+<strong>テストは通ります。</strong><code>left += 1</code> でも <code>target</code> を範囲の外に出さないので、
+<strong>答えは正しく返り、テストは通ります</strong>。遅いことだけが残る。
+③が保証しているのは「<code>mid+1</code> まで進めて<strong>よい</strong>」であって、進めなければならないとは言っていません
+——<strong>正しさは率を強制しない。</strong>
+16 の <code>sort()</code> 欠落（<a href="../learning-records/0015-preconditions-are-invisible.md">LR-0015</a>）と同じ構造です。
+</p>
+</div>
 
 <h2>6. 頻出バグ一覧</h2>
 

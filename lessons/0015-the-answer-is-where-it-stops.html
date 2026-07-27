@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 15 — 答えは、止まった場所</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+/* 型A・型Bの対比表。決め事が3つとも変わることを一目で見せる */
+table.ab td.k, table.ab th.k { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
+table.ab tr.hl td { background: color-mix(in srgb, var(--ok, #2a7) 10%, transparent); }
+/* 冒頭の retrieval を本編と視覚的に切り離す（Lesson 14 と同じ） */
+.recall { border: 1px solid var(--rule); border-radius: 5px; padding: 1.2rem 1.3rem .6rem; margin: 2rem 0 3rem; }
+.recall > .label { font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: .6rem; }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">Lesson 15 · binary search 型B</p>
+<h1>答えは、止まった場所</h1>
+<p class="subtitle">704 は「見つけたら返す」問題でした。面接で本当によく出るのは<strong>見つからない問題</strong>——それでも答えがある形です。</p>
+
+<div class="recall">
+  <span class="label">まず思い出す（記述式・2問）</span>
+
+  <div class="check" data-answer="上限" data-alt="上界|面積の上限|上限を押さえる|上限を決める|bound|上限だけ">
+    <p class="check-q">
+      11. Container With Most Water。低いほうの板を捨ててよいと判断するのに使ったのは、
+      板の「値」ではなく何か。<strong>漢字2文字</strong>で。
+    </p>
+    <input class="check-in" type="text" placeholder="漢字2文字">
+    <button class="check-btn">確認</button>
+    <p class="check-fb">
+      <strong>上限。</strong><code>min(height[l], height[r]) × 幅</code> がその板を含む全組の面積の<strong>上限</strong>で、
+      幅は減る一方・水位は <code>min</code> のまま増えないので、まとめて捨てられる。
+      <strong><code>height[j]</code>（高い側の実際の値）は最後まで一度も読んでいません。</strong>
+      ③は値を知ることではなく上限を押さえること（<a href="../learning-records/0012-bound-not-value.md">LR-0012</a>）。
+      —— 07-27 に一度「忘れた」と申告した問いです。今日書けたなら、それは<strong>再学習が効いた</strong>ということ。
+    </p>
+  </div>
+
+  <div class="check" data-answer="l=mid+1" data-alt="left=mid+1|l = mid+1|left = mid + 1|l=mid+1/r=mid-1|更新行|left=mid+1,right=mid-1|mid+1">
+    <p class="check-q">
+      704 で「毎回<strong>半分</strong>捨てる」と言った。その<strong>半分</strong>を実現している行を、そのまま書く。
+    </p>
+    <input class="check-in" type="text" placeholder="行をそのまま">
+    <button class="check-btn">確認</button>
+    <p class="check-fb">
+      <strong><code>l = mid + 1</code>（と <code>r = mid - 1</code>）。</strong>
+      あなたの最初の提出は <code>l += 1</code> でした——⑥は「半分」、コードは「1個」。
+      <strong>それでもテストは通った</strong>（<a href="../learning-records/0020-the-rate-must-be-in-the-code.md">LR-0020</a>）。
+      <strong>⑥で量を言ったら、その量を実現している行を指す。指せなければ、その行はまだ存在しない。</strong>
+    </p>
+  </div>
+</div>
+
+<p class="lead">
+704 は <code>return mid</code> で終わりました。<strong>答えが配列の中にある</strong>問題だからです。<br>
+では <code>target</code> が配列に無いとき、「<strong>どこに入るべきか</strong>」を返せと言われたら？<br>
+<code>return mid</code> は一度も実行されません。<strong>答えはループが終わった場所にあります。</strong>
+</p>
+
+<h2>1. 型Aが答えられない問い</h2>
+
+<p>
+35. Search Insert Position は 704 とほぼ同じ問題文で、最後の一行だけ違います。
+</p>
+
+<table>
+  <tr><th></th><th>問い</th><th>target が無いとき</th></tr>
+  <tr><td>704（型A）</td><td>target の添字は</td><td><code>-1</code> を返す</td></tr>
+  <tr><td>35（型B）</td><td>target を<strong>挿入すべき</strong>位置は</td><td><strong>答えがある。</strong>ソート順を保つ位置</td></tr>
+</table>
+
+<p>
+型Aのコードを 35 に流用すると、<code>while</code> を抜けたところで <code>return -1</code> に落ちます。
+ここで手が止まる——というのが型Bを知らないときの典型です。
+ところが、<strong>その時点で答えはもう <code>left</code> に入っています。</strong>
+</p>
+
+<h2>2. 不変条件を、そのまま答えにする</h2>
+
+<p>
+<a href="./0014-the-rate-not-the-reason.html">Lesson 14</a> §2 で置いた不変条件を思い出してください。
+型Bでは、これを<strong>もっと強い形</strong>で持ちます。半開区間 <code>[left, right)</code> で：
+</p>
+
+<blockquote>
+<code>left</code> より左は<strong>全部 <code>&lt; target</code></strong>。<code>right</code> 以降は<strong>全部 <code>&gt;= target</code></strong>。<br>
+まだ調べていないのは <code>[left, right)</code> だけ。
+</blockquote>
+
+<p>
+ループが終わるのは <code>left == right</code> になったとき、つまり<strong>未調査の区間が空になったとき</strong>です。
+そのとき不変条件はこう読めます——<strong>その1点より左は全部 <code>&lt; target</code>、その点以降は全部 <code>&gt;= target</code>。</strong>
+これは「境界」の定義そのもの。だから <code>return left</code>。
+</p>
+
+<pre><code>def search_insert(nums, target):
+    left, right = 0, len(nums)        # 半開区間 [left, right)
+    while left &lt; right:
+        mid = (left + right) // 2
+        if nums[mid] &lt; target:
+            left = mid + 1            # mid は条件を満たさない → 捨てる
+        else:
+            right = mid               # mid は「まだ候補」→ 残す
+    return left</code></pre>
+
+<div class="aside">
+  <span class="label">型Bの正体</span>
+  <p>
+  これは <code>bisect_left</code> そのものです。標準ライブラリのドキュメントは、返り値 <code>i</code> について
+  <code>a[:i]</code> は全部 <code>&lt; x</code>、<code>a[i:]</code> は全部 <code>&gt;= x</code> と保証しています——
+  <strong>上の不変条件を、ライブラリの言葉で書いたもの。</strong>
+  面接で「<code>bisect_left</code> で1行ですが、手で書きますね」と言ってから書けると強い。
+  </p>
+</div>
+
+<h2>3. 決め事は三つとも変わる</h2>
+
+<p>
+Lesson 14 で「三つの決め事は連動する。一つ変えたら三つ見直す」と言いました。実演です。
+</p>
+
+<table class="ab">
+  <tr><th></th><th class="k">型A（704）</th><th class="k">型B（35）</th></tr>
+  <tr><td>区間</td><td class="k">[left, right] 閉</td><td class="k">[left, right) 半開</td></tr>
+  <tr><td><code>right</code> の初期値</td><td class="k">len(nums) - 1</td><td class="k">len(nums)</td></tr>
+  <tr><td>while</td><td class="k">left &lt;= right</td><td class="k">left &lt; right</td></tr>
+  <tr class="hl"><td>更新（捨てる側）</td><td class="k">left = mid + 1</td><td class="k">left = mid + 1</td></tr>
+  <tr class="hl"><td>更新（残す側）</td><td class="k">right = mid - 1</td><td class="k">right = mid</td></tr>
+  <tr><td>返すもの</td><td class="k">return mid（見つけたら）</td><td class="k">return left（抜けたあと）</td></tr>
+</table>
+
+<p>
+<strong>±1 が付くかどうかを決めているのは、<code>mid</code> がまだ答えの候補かどうかです。</strong>
+</p>
+
+<ul>
+  <li><code>nums[mid] &lt; target</code> のとき、<code>mid</code> は<strong>答えではありえない</strong>（自分より小さいので）。だから <code>mid + 1</code>。</li>
+  <li><code>nums[mid] &gt;= target</code> のとき、<code>mid</code> は<strong>まだ答えかもしれない</strong>。だから <code>mid</code> のまま。<code>mid - 1</code> と書くと<strong>答えを飛び越します</strong>。</li>
+</ul>
+
+<div class="check" data-answer="mid" data-alt="right=mid|right = mid|mid自身|mid そのもの">
+  <p class="check-q">
+    型Bで <code>right = mid - 1</code> と書いてしまった。<code>nums = [1,3,5]</code>, <code>target = 3</code> のとき、
+    <strong>飛び越されてしまう添字</strong>は？（数字1つ）
+  </p>
+  <input class="check-in" type="text" placeholder="添字（数字）">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+    <strong><code>1</code>。</strong><code>left=0, right=3, mid=1</code>、<code>nums[1]=3 &gt;= 3</code> なので残す側。
+    ここで <code>right = 0</code> にすると、<strong>正解である添字 1 が範囲から消えます</strong>。
+    答えは <code>0</code> になり、間違い。<strong>「残す側」に <code>-1</code> は付けない。</strong>
+  </p>
+</div>
+
+<h2>4. 終了性を、隣り合った2要素で確かめる</h2>
+
+<p>
+Lesson 14 で最も多いバグとして挙げたのが<strong>範囲が真に狭まらない無限ループ</strong>でした。
+型Bは <code>right = mid</code> と書くので、<strong>ここが一番怪しく見えます</strong>。手で確かめます。
+</p>
+
+<p>
+<code>left = 3, right = 4</code>（未調査が1個だけ）のとき <code>mid = (3+4)//2 = 3</code>。
+</p>
+
+<ul>
+  <li>捨てる側なら <code>left = 4</code> → <code>left == right</code> で終了。</li>
+  <li>残す側なら <code>right = 3</code> → <code>left == right</code> で終了。</li>
+</ul>
+
+<p>
+<strong><code>mid</code> は必ず <code>right</code> より小さい</strong>（切り捨て除算なので）。
+だから <code>right = mid</code> は必ず <code>right</code> を真に減らします。無限ループにはなりません。<br>
+——ただしこれは <code>while left &lt; right</code> と組んだときの話です。
+<code>&lt;=</code> にすると <code>left == right == mid</code> で <code>right = mid</code> が何も変えず、<strong>止まらなくなります</strong>。
+これが「三つの決め事は連動する」の意味です。
+</p>
+
+<h2>5. ⑥は型Aと同じ。ただし1行目から</h2>
+
+<blockquote>
+毎回、残っている範囲の<strong>半分</strong>を捨てる（<code>left = mid + 1</code> / <code>right = mid</code> がそれを実現している）。
+<code>n → n/2 → … → 1</code> で <code>log₂ n</code> 回。よって <code>O(log n)</code>。空間は反復なので <code>O(1)</code>。
+</blockquote>
+
+<p>
+括弧の中が今日の追加です。<strong>量を言ったら、その量を実現している行を名指しする</strong>
+（<a href="../learning-records/0020-the-rate-must-be-in-the-code.md">LR-0020</a>）。
+これは⓪で既にやっていること（前提と、それを保証している行）を⑥に移しただけです。
+</p>
+
+<h2>今日の課題</h2>
+
+<p><strong>35. Search Insert Position</strong> を、いつもの新形式で。</p>
+
+<p>実装前（コードを書く前に、自由記述）：</p>
+<ul>
+  <li><strong>⓪</strong> この解法が成り立つために必要な条件と、それを保証しているのは誰か</li>
+  <li><strong>②</strong> 素朴解と、そのボトルネック（素朴解に出てくる語をそのまま含める）</li>
+  <li><strong>③</strong> <code>nums[mid] &gt;= target</code> のとき、消える区間はどれか。<strong>先に名指し、次に理由</strong>
+      —— 704 と<strong>違う点</strong>が1つあります。そこを明示すること</li>
+</ul>
+
+<p>実装後：</p>
+<ul>
+  <li><strong>⑥</strong> 時間と空間。<strong>言った量を実現している行を名指しする</strong></li>
+  <li><strong>⚠</strong> 今日いちばん<strong>自信のない判断をした行</strong>を1つ、理由つきで
+      （「危なそうな行」ではなく「迷った行」）</li>
+</ul>
+
+<p>
+そのあと <strong>278. First Bad Version</strong>。同じ型ですが、配列がありません——
+<code>isBadVersion(v)</code> という関数だけがあり、<code>False,False,…,True,True</code> と並んでいます。
+<strong>ソート済み配列でなくても二分探索できる</strong>ことを確かめる問題です。
+「何がソートされていれば二分探索できるのか」を⓪で書いてください。
+</p>
+
+<h2>読むもの</h2>
+
+<p>
+主資料：<a href="https://github.com/python/cpython/blob/main/Lib/bisect.py">CPython の <code>Lib/bisect.py</code></a>。
+<code>bisect_left</code> と <code>bisect_right</code> の実装は<strong>それぞれ7行</strong>で、
+違いは不等号1文字だけです。今日の型Bの正典なので、自分のコードと並べて見てください。
+</p>
+
+<p class="footer">
+分からないところはその場で聞いてください。私はあなたの教師です。<br>
+関連：<a href="./0014-the-rate-not-the-reason.html">Lesson 14</a> ·
+<a href="../reference/binary-search-template.html">Binary Search テンプレート</a> ·
+<a href="../reference/interview-protocol.html">面接プロトコル</a> ·
+<a href="../reference/boundary-checklist.html">境界チェックリスト</a> ·
+<a href="../reference/glossary.html">用語集</a>
+</p>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>
