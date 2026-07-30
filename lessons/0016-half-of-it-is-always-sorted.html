@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 16 — どこで切っても、片側は必ずソート済み</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+/* 冒頭の retrieval を本編と視覚的に切り離す（Lesson 14・15 と同じ） */
+.recall { border: 1px solid var(--rule); border-radius: 5px; padding: 1.2rem 1.3rem .6rem; margin: 2rem 0 3rem; }
+.recall > .label { font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: .6rem; }
+/* 配列を1マスずつ見せる帯。回転点と「ソート済みの側」を色で示す */
+.arr { font-family: var(--mono); font-size: .8rem; border-collapse: collapse; margin: 1.2rem 0; }
+.arr td, .arr th { border: 1px solid var(--rule); padding: .28rem .6rem; text-align: center; font-weight: 400; }
+.arr th { color: var(--muted); font-size: .7rem; }
+.arr td.sorted { background: color-mix(in srgb, var(--ok, #2a7) 14%, transparent); }
+.arr td.mid { outline: 2px solid var(--ink); outline-offset: -2px; }
+.arr caption { caption-side: bottom; color: var(--muted); font-size: .78rem; padding-top: .5rem; text-align: left; }
+/* ③の二段を段組で見せる */
+.stage { border-left: 3px solid var(--rule); padding-left: 1rem; margin: 1.4rem 0; }
+.stage > .label { font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: .3rem; }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">Lesson 16 · binary search 型C</p>
+<h1>どこで切っても、片側は必ずソート済み</h1>
+<p class="subtitle">ここまでの3つの型は、すべて⓪に「ソート済み」と書けました。今日は<strong>ソートされていない配列</strong>で、それでも半分捨てます。</p>
+
+<div class="recall">
+  <span class="label">まず思い出す（記述式・2問）</span>
+
+  <div class="check" data-answer="幅" data-alt="はば|横幅|幅が狭くなる|幅が減る|width">
+    <p class="check-q">
+      11. Container With Most Water。捨てる組について「面積は<strong>必ず今より小さい</strong>」と言い切るには、
+      〈高さの上限が上がらない〉のほかに、もう一つ要素が要る。<strong>漢字1文字</strong>で。
+    </p>
+    <input class="check-in" type="text" placeholder="漢字1文字">
+    <button class="check-btn">確認</button>
+    <p class="check-fb">
+      <strong>幅。</strong>③は2つの要素の掛け算で閉じる——
+      <strong>高さは <code>min</code> に頭打ちされて上がらず、幅は必ず狭くなる</strong>。だから面積は必ず小さい。<br>
+      07-29 の retrieval では高さ側だけが出て、<strong>幅が落ちていました</strong>
+      （<a href="../learning-records/0022-the-picture-shows-what-was-not-called.md">LR-0022</a>）。
+      片方だけだと「同じ面積の組が残るのでは」に答えられません。
+    </p>
+  </div>
+
+  <div class="check" data-answer="候補" data-alt="midが候補か|mid が候補かどうか|候補として残るか|mid が残るか|mid が生き残るか|まだ候補か">
+    <p class="check-q">
+      278 で教えた規則。更新に <code>±1</code> が付くかどうかを決めているのは、左右ではなく
+      <strong>その枝で <code>mid</code> が ___ として生き残るか</strong>。空欄に入る<strong>漢字2文字</strong>。
+    </p>
+    <input class="check-in" type="text" placeholder="漢字2文字">
+    <button class="check-btn">確認</button>
+    <p class="check-fb">
+      <strong>候補。</strong>答えではないと<strong>確定した</strong>なら <code>mid ± 1</code>、
+      <strong>まだ答えかもしれない</strong>なら <code>mid</code>（±1 なし）。<br>
+      「左は +1、右は無し」と<strong>位置で覚えると、型が変わった瞬間に崩れます</strong>。今日がその瞬間です。
+    </p>
+  </div>
+</div>
+
+<p class="lead">
+<code>[4,5,6,7,0,1,2]</code>。ソートされていません。<br>
+⓪に「ソート済み」と書けない以上、ここまでの二分探索の根拠は<strong>全部使えません</strong>。<br>
+それでも <code>O(log n)</code> で探せます。<strong>前提を、成り立つ形まで弱めれば。</strong>
+</p>
+
+<h2>1. 壊れているのは全体だけ</h2>
+
+<p>
+回転ソート配列とは、ソート済み配列をどこか1か所で切って前後を入れ替えたもの。
+大事なのは<strong>切れ目が1つしかない</strong>ことです。
+</p>
+
+<table class="arr">
+  <tr><th>添字</th><td>0</td><td>1</td><td>2</td><td class="mid">3</td><td>4</td><td>5</td><td>6</td></tr>
+  <tr><th>値</th><td class="sorted">4</td><td class="sorted">5</td><td class="sorted">6</td><td class="sorted mid">7</td><td>0</td><td>1</td><td>2</td></tr>
+  <caption><code>mid = 3</code> で切ると、左 <code>[4,5,6,7]</code> はソート済み。切れ目は右側にある。</caption>
+</table>
+
+<p>
+どこで切っても、<strong>切れ目は左右どちらか一方にしか入りません</strong>（切れ目は1つしかないので）。
+切れ目が入らなかった側は、そのまま<strong>ソート済み</strong>です。これが今日の⓪です。
+</p>
+
+<blockquote>
+配列全体は単調でない。しかしどこを <code>mid</code> にしても、
+<code>[left, mid]</code> と <code>[mid, right]</code> の<strong>少なくとも一方は必ずソート済み</strong>である。<br>
+保証しているのは<strong>問題文</strong>（「ソート済み配列を1回だけ回転したもの」）。
+</blockquote>
+
+<p>
+そして<strong>どちらがソート済みかは、両端と <code>mid</code> を比べるだけで判定できます</strong>——
+<code>nums[left] &lt;= nums[mid]</code> なら左側。そうでなければ右側。値は全部見えているので、
+呼び出しコストはありません（278 の <code>?</code> の心配は無用です）。
+</p>
+
+<div class="check" data-answer="右" data-alt="右側|右半分|みぎ|right|[mid, right]">
+  <p class="check-q">
+    <code>[6,7,0,1,2,4,5]</code>、<code>left=0, right=6</code>、<code>mid=3</code>（<code>nums[mid]=1</code>）。
+    ソート済みなのは<strong>どちら側</strong>か。<strong>漢字1文字</strong>で。
+  </p>
+  <input class="check-in" type="text" placeholder="漢字1文字">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+    <strong>右。</strong><code>nums[0]=6 &gt; nums[3]=1</code> なので、切れ目は左側（6 と 7 の後）にあります。
+    右側 <code>[1,2,4,5]</code> はソート済み。<br>
+    <strong>「左がソート済み」が普通で「右」が例外、ではありません。</strong>どちらも同じ頻度で起きます。
+  </p>
+</div>
+
+<h2>2. ③が二段になる</h2>
+
+<p>
+ここが今日の本番です。ここまでの型では、③は
+<strong>「消える区間を名指し → 理由 → 否定文で閉じる」</strong>の一段でした。
+型Cでは、その前にもう一段入ります。
+</p>
+
+<div class="stage">
+  <span class="label">段1 — どちらがソート済みか</span>
+  <p><code>nums[left] &lt;= nums[mid]</code> か否かで決まる。<strong>target は一切登場しない。</strong></p>
+</div>
+
+<div class="stage">
+  <span class="label">段2 — ソート済みの側に target が入るか</span>
+  <p>その側の<strong>両端の値と比べるだけ</strong>で、入るか入らないかを<strong>断定できる</strong>。</p>
+</div>
+
+<p>
+そして捨てられるのは——<strong>ソート済みで、かつ target が入らないと断定できた側</strong>です。
+</p>
+
+<h3>なぜ段1が要るのか</h3>
+
+<p>
+ソートされていない側では、<strong>両端の値と比べても何も断定できない</strong>からです。
+</p>
+
+<table class="arr">
+  <tr><th>添字</th><td>0</td><td>1</td><td>2</td><td class="mid">3</td><td>4</td><td>5</td><td>6</td></tr>
+  <tr><th>値</th><td class="sorted">4</td><td class="sorted">5</td><td class="sorted">6</td><td class="sorted mid">7</td><td>0</td><td>1</td><td>2</td></tr>
+  <caption>右側 <code>[7,0,1,2]</code> は両端が 7 と 2。<code>target=5</code> は「7 と 2 の間」に見えるが、実際には無い。</caption>
+</table>
+
+<p>
+右側の両端は 7 と 2。<code>target = 5</code> は 2 と 7 の間にあります。
+それでも右側に 5 はありません。<strong>ソートされていない区間では、両端は中身について何も語らない</strong>——
+これは <a href="../learning-records/0012-bound-not-value.md">LR-0012</a>（上限を押さえる）が<strong>使えなくなる</strong>条件でもあります。
+</p>
+
+<p>
+一方、左側 <code>[4,5,6,7]</code> はソート済みなので、<code>4 &lt;= 5 &lt; 7</code> から
+<strong>5 はここにある</strong>と断定できる。だから右側を捨てる。<strong>断定できる側でしか、判断してはいけません。</strong>
+</p>
+
+<div class="check" data-answer="左" data-alt="左側|左半分|ひだり|left|[left, mid]">
+  <p class="check-q">
+    同じ <code>[4,5,6,7,0,1,2]</code>、<code>mid=3</code>、今度は <code>target = 1</code>。
+    <strong>捨てられるのはどちら側</strong>か。<strong>漢字1文字</strong>で。
+  </p>
+  <input class="check-in" type="text" placeholder="漢字1文字">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+    <strong>左。</strong>段1：ソート済みなのは左 <code>[4,5,6,7]</code>。
+    段2：<code>1 &lt; 4</code> なので、<strong>この範囲には入らないと断定できる</strong>。よって左側に答えは<strong>ない</strong>。<br>
+    <strong>捨てるのは常にソート済みの側とは限りません。</strong>判定するのがソート済みの側なだけで、
+    捨てるのは<strong>そこに無いと分かったとき</strong>。無いと分かればその側を、あると分かれば反対側を捨てます。
+  </p>
+</div>
+
+<h2>3. 最小値を探す（153）は、278 そのもの</h2>
+
+<p>
+33 の前に、もっと易しい型C——<strong>153. Find Minimum in Rotated Sorted Array</strong> を片付けます。
+これは昨日の <code>first_true</code> がそのまま使えます。
+</p>
+
+<p>
+最後の要素 <code>last = nums[-1]</code> を基準にして、述語 <code>nums[i] &lt;= last</code> を並べてみます。
+</p>
+
+<table class="arr">
+  <tr><th>添字</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+  <tr><th>値</th><td>4</td><td>5</td><td>6</td><td>7</td><td class="sorted">0</td><td class="sorted">1</td><td class="sorted">2</td></tr>
+  <tr><th>≤ 2 ?</th><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td class="sorted">✓</td><td class="sorted">✓</td><td class="sorted">✓</td></tr>
+  <caption><code>✗…✗ ✓…✓</code> と並び、一度 ✓ になったら ✗ に戻らない。<strong>最小値は最初の ✓。</strong></caption>
+</table>
+
+<p>
+配列自体は単調でないのに、<strong>この述語は単調</strong>です。
+278 の⓪で書いたのはまさにこれ——<strong>必要なのはソート順ではなく単調性</strong>。
+だから昨日の <code>first_true</code> をそのまま流用できます。
+</p>
+
+<pre><code>def find_min(nums):
+    lo, hi = 0, len(nums) - 1
+    last = nums[-1]
+    while lo &lt; hi:
+        mid = (lo + hi) // 2
+        if nums[mid] &lt;= last:
+            hi = mid            # mid は「最初の ✓」かもしれない → 残す
+        else:
+            lo = mid + 1        # mid は ✗ と確定 → 消す
+    return nums[lo]</code></pre>
+
+<p>
+<strong>±1 の付き方は 278 と1文字も変わっていません。</strong>今日の retrieval 2問目の規則
+（<code>mid</code> が候補として生き残るか）が、配列が回転しても同じように効いています。<br>
+ランダムな回転配列 20 万件で <code>min(nums)</code> と完全一致することは確認済みです。
+</p>
+
+<div class="aside">
+  <span class="label">よく見る別バージョン</span>
+  <p>
+  <code>nums[mid] &gt; nums[hi]</code> と<strong>その時点の <code>hi</code></strong> と比べる書き方も広く使われます。
+  やっていることは同じですが、<strong>比較相手が動く</strong>ぶん不変条件の説明が一段難しくなります。
+  面接では <code>last</code> を固定して「述語が単調だから <code>first_true</code>」と言うほうが、
+  <strong>③が短く済みます</strong>。
+  </p>
+</div>
+
+<h2>4. ⑥は今日も変わらない</h2>
+
+<blockquote>
+毎回、残っている範囲の<strong>半分</strong>を捨てる（<code>lo = mid + 1</code> / <code>hi = mid</code> がそれを実現している）。
+<code>log₂ n</code> 回で <code>O(log n)</code>。空間は <code>O(1)</code>。
+</blockquote>
+
+<p>
+型Cで増えるのは<strong>1回あたりの判定の手数</strong>（段1 → 段2）だけで、<strong>回数は増えません</strong>。
+定数倍の話なので <code>O(log n)</code> のまま——ここを混同して「二段だから <code>log² n</code>」と言わないこと。
+</p>
+
+<h2>今日の課題</h2>
+
+<p><strong>33. Search in Rotated Sorted Array</strong> を、いつもの新形式で。</p>
+
+<p>実装前（コードを書く前に、自由記述）：</p>
+<ul>
+  <li><strong>⓪</strong> この解法が成り立つために必要な条件と、それを保証しているのは誰か。
+      <strong>「ソート済み」とは書けません。</strong>成り立つところまで弱めて書くこと</li>
+  <li><strong>★</strong> 探しているものを一文で（型B で新設した欄。型Cでは短くなるはずです）</li>
+  <li><strong>②</strong> 素朴解と、そのボトルネック（素朴解に出てくる語をそのまま含める）</li>
+  <li><strong>③ ——今日の本番。二段で書くこと</strong>
+    <ul>
+      <li><strong>段1</strong>：どちらの側がソート済みか。その判定に使う式</li>
+      <li><strong>段2</strong>：<code>[4,5,6,7,0,1,2]</code>, <code>target = 0</code>, <code>mid = 3</code> の場合について、
+          <strong>消える区間を先に名指し</strong>してから理由。最後は否定文で閉じる</li>
+    </ul>
+  </li>
+</ul>
+
+<p>実装は、この骨組みの<strong>4つの空欄</strong>を埋める形で書いてください。</p>
+
+<pre><code>def search(nums, target):
+    l, r = 0, len(nums) - 1
+    while l &lt;= r:
+        mid = (l + r) // 2
+        if nums[mid] == target:
+            return mid
+
+        if ______________:              # 段1：左がソート済みか
+            if ______________:          # 段2：target は左に入るか
+                r = mid - 1
+            else:
+                l = mid + 1
+        else:                           # 右がソート済み
+            if ______________:          # 段2：target は右に入るか
+                l = mid + 1
+            else:
+                r = mid - 1
+    return -1</code></pre>
+
+<p>
+空欄は<strong>不等号の向きと、等号を付けるかどうか</strong>が全てです。
+<code>nums[l]</code> / <code>nums[mid]</code> / <code>nums[r]</code> と <code>target</code> しか使いません。
+</p>
+
+<p>実装後：</p>
+<ul>
+  <li><strong>⑥</strong> 時間と空間。<strong>言った量を実現している行を名指しする</strong>（両方の枝）</li>
+  <li><strong>⚠</strong> 今日いちばん<strong>自信のない判断をした行</strong>を1つ、理由つきで</li>
+</ul>
+
+<p>
+そのあと <strong>153. Find Minimum in Rotated Sorted Array</strong> を、
+上の <code>find_min</code> を<strong>見ずに</strong>書いてください。§3 を読んだ直後ではなく、<strong>33 を終えてから</strong>。
+</p>
+
+<h2>読むもの</h2>
+
+<p>
+主資料：<a href="https://neetcode.io/problems/find-target-in-rotated-sorted-array">NeetCode — Find Target in Rotated Sorted Array</a>。
+今日の「片側は必ずソート済み」を、図で丁寧に追う解説です。<strong>課題を出してから</strong>見てください。
+このワークスペースには「<strong>解答を見て理解した状態</strong>」で止まっていた問題が、
+自力の手続きを挟んだ途端に解けた記録があります
+（<a href="../learning-records/0005-boundary-drill-worked.md">LR-0005</a>）——<strong>理解と、自力で組み立てられることは別物</strong>です。
+</p>
+
+<p class="footer">
+分からないところはその場で聞いてください。私はあなたの教師です。<br>
+関連：<a href="./0015-the-answer-is-where-it-stops.html">Lesson 15</a> ·
+<a href="./0014-the-rate-not-the-reason.html">Lesson 14</a> ·
+<a href="../reference/binary-search-template.html">Binary Search テンプレート</a> ·
+<a href="../reference/interview-protocol.html">面接プロトコル</a> ·
+<a href="../reference/boundary-checklist.html">境界チェックリスト</a> ·
+<a href="../reference/glossary.html">用語集</a>
+</p>
+
+<script src="../assets/input-check.js"></script>
+</body>
+</html>

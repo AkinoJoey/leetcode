@@ -1,0 +1,194 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference — 選抜問題セット（v2）</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+
+<p class="eyebrow">Reference · 2026-07-30 作成 · <a href="./study-plan.html">学習計画 v2</a> の実体</p>
+<h1>選抜問題セット</h1>
+<p class="subtitle">提供された約140問のリストから、残り9週・約90時間に収まる<strong>56問</strong>を選抜。</p>
+
+<h2>選抜の原則</h2>
+
+<ul>
+  <li><strong>ROI表＝時間の配分／問題リスト＝配分内での選択。</strong>層が違うので競合しません。
+      リストの「重要度：高」は<em>そのカテゴリを勉強するなら</em>という<strong>カテゴリ内の順位</strong>として読みます。</li>
+  <li><strong>新規は56問に留める。</strong>90時間は約110問ぶんですが、
+      残りは<strong>復習（解き直し）と模擬面接</strong>に充てます。新規で埋め尽くすと
+      <a href="../learning-records/0022-the-picture-shows-what-was-not-called.md">LR-0022</a> の再発（習ったことが retrieval に出てこない）になります。</li>
+  <li><strong>同一パターンは3問目で打ち切る。</strong>4問目の伸びより、未着手パターンに1問触れる方が価値が高い。</li>
+  <li><strong>★（習得コスト）の低い問題を各ブロックの入口に置く。</strong>いきなり★3から入ると詰まりが「パターン理解」なのか「実装」なのか切り分けられません。</li>
+</ul>
+
+<h2>7/31 – 8/02 ｜ 二分探索の締め（3問）</h2>
+<p><a href="./study-plan.html">計画 v2</a> どおり、ここで<strong>打ち止め</strong>にします。</p>
+<table>
+  <thead><tr><th>#</th><th>問題</th><th>★</th><th>狙い</th></tr></thead>
+  <tbody>
+    <tr><td>33</td><td><a href="https://leetcode.com/problems/search-in-rotated-sorted-array/">Search in Rotated Sorted Array</a></td><td>★★★</td><td>型C。<a href="../lessons/0016-half-of-it-is-always-sorted.html">Lesson 16</a> の課題（進行中）</td></tr>
+    <tr><td>153</td><td><a href="https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/">Find Minimum in Rotated Sorted Array</a></td><td>★★★</td><td>型C。<code>first_true</code> の直接適用として</td></tr>
+    <tr><td>875</td><td><a href="https://leetcode.com/problems/koko-eating-bananas/">Koko Eating Bananas</a></td><td>★★★</td><td><strong>「答えを二分探索」＝配列でないものを探す</strong>。ここまでで終了</td></tr>
+  </tbody>
+</table>
+<p class="muted"><strong>不採用</strong>：74 / 981 / 2187 / 744 / 852 / 57。すべて妥当な良問ですが、
+二分探索はROI★2・コスト「高」で、型A〜Cとこの3問でコストは回収済みです。余力が出たら 74（2次元）だけ。</p>
+
+<h2>8/03 – 8/09 ｜ 配列と文字列 ①（8問）</h2>
+<p>★5トピックの本命ブロック。<strong>prefix sum</strong> と <strong>スタック</strong>——v1 で取りこぼしていた2つ。</p>
+<table>
+  <thead><tr><th>#</th><th>問題</th><th>★</th><th>狙い</th></tr></thead>
+  <tbody>
+    <tr><td>1480</td><td><a href="https://leetcode.com/problems/running-sum-of-1d-array/">Running Sum of 1d Array</a></td><td>★</td><td>prefix sum の定義そのもの。入口</td></tr>
+    <tr><td>1422</td><td><a href="https://leetcode.com/problems/maximum-score-after-splitting-a-string/">Maximum Score After Splitting a String</a></td><td>★★</td><td>1回の走査で左右を同時に持つ</td></tr>
+    <tr><td>238</td><td><a href="https://leetcode.com/problems/product-of-array-except-self/">Product of Array Except Self</a></td><td>★★★</td><td><strong>左からの累積 × 右からの累積</strong>。除算禁止の制約が本体</td></tr>
+    <tr><td>560</td><td><a href="https://leetcode.com/problems/subarray-sum-equals-k/">Subarray Sum Equals K</a></td><td>★★★</td><td><strong>prefix sum × ハッシュ</strong>。<a href="../lessons/0001-hash-map-collapse.html">Lesson 01</a> の再利用</td></tr>
+    <tr><td>974</td><td><a href="https://leetcode.com/problems/subarray-sums-divisible-by-k/">Subarray Sums Divisible by K</a></td><td>★★★</td><td>560 の2問目。キーが「和」から「剰余」に変わるだけ</td></tr>
+    <tr><td>20</td><td><a href="https://leetcode.com/problems/valid-parentheses/">Valid Parentheses</a></td><td>★★</td><td>スタックの入口。v1 でスキップした箇所</td></tr>
+    <tr><td>1047</td><td><a href="https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string/">Remove All Adjacent Duplicates</a></td><td>★★</td><td>「直前と比べて消す」＝スタックの合図</td></tr>
+    <tr><td>155</td><td><a href="https://leetcode.com/problems/min-stack/">Min Stack</a></td><td>★★★</td><td><strong>設計問題の入口</strong>。各要素に付随情報を持たせる</td></tr>
+  </tbody>
+</table>
+<p class="muted"><strong>余力枠</strong>：735 Asteroid Collision（★★★・単調スタックの典型）→ 71 Simplify Path → 856。</p>
+
+<h2>8/10 – 8/16 ｜ 再帰の土台 → 二分木（8問）</h2>
+<p><strong>ROI★3・高コストの再帰を前倒し</strong>。木で再帰を体に入れます。★★の安い5問を先に。</p>
+<table>
+  <thead><tr><th>#</th><th>問題</th><th>★</th><th>狙い</th></tr></thead>
+  <tbody>
+    <tr><td>104</td><td><a href="https://leetcode.com/problems/maximum-depth-of-binary-tree/">Maximum Depth of Binary Tree</a></td><td>★★</td><td><strong>再帰の型：基底 ＋ 子の結果の合成</strong></td></tr>
+    <tr><td>226</td><td><a href="https://leetcode.com/problems/invert-binary-tree/">Invert Binary Tree</a></td><td>★★</td><td>木を「変える」再帰</td></tr>
+    <tr><td>100</td><td><a href="https://leetcode.com/problems/same-tree/">Same Tree</a></td><td>★★</td><td>2本を同時に降りる</td></tr>
+    <tr><td>110</td><td><a href="https://leetcode.com/problems/balanced-binary-tree/">Balanced Binary Tree</a></td><td>★★</td><td><strong>戻り値に2つの情報を載せる</strong>（高さ ＋ 判定）</td></tr>
+    <tr><td>572</td><td><a href="https://leetcode.com/problems/subtree-of-another-tree/">Subtree of Another Tree</a></td><td>★★</td><td>再帰の中で別の再帰を呼ぶ。⑥が難所</td></tr>
+    <tr><td>144</td><td><a href="https://leetcode.com/problems/binary-tree-preorder-traversal/">Preorder Traversal</a></td><td>★★</td><td rowspan="3"><strong>3つ続けて解いて「順序が何を決めるか」を体感する</strong>。<br>差分は1行の位置だけ</td></tr>
+    <tr><td>94</td><td><a href="https://leetcode.com/problems/binary-tree-inorder-traversal/">Inorder Traversal</a></td><td>★★</td></tr>
+    <tr><td>145</td><td><a href="https://leetcode.com/problems/binary-tree-postorder-traversal/">Postorder Traversal</a></td><td>★★</td></tr>
+  </tbody>
+</table>
+
+<h2>8/17 – 8/23 ｜ 二分木 続き ＋ バックトラック ①（8問）</h2>
+<table>
+  <thead><tr><th>#</th><th>問題</th><th>★</th><th>狙い</th></tr></thead>
+  <tbody>
+    <tr><td>102</td><td><a href="https://leetcode.com/problems/binary-tree-level-order-traversal/">Level Order Traversal</a></td><td>★★</td><td><strong>BFS の型</strong>。「1階層ぶんをまとめて取り出す」</td></tr>
+    <tr><td>199</td><td><a href="https://leetcode.com/problems/binary-tree-right-side-view/">Right Side View</a></td><td>★★★</td><td>102 の応用。各階層の最後だけ</td></tr>
+    <tr><td>1161</td><td><a href="https://leetcode.com/problems/maximum-level-sum-of-a-binary-tree/">Maximum Level Sum</a></td><td>★★★</td><td>102 の3問目。ここで BFS は打ち切り</td></tr>
+    <tr><td>1448</td><td><a href="https://leetcode.com/problems/count-good-nodes-in-binary-tree/">Count Good Nodes</a></td><td>★★★</td><td><strong>上から情報を渡す DFS</strong>（104 は下から上げる型）</td></tr>
+    <tr><td>543</td><td><a href="https://leetcode.com/problems/diameter-of-binary-tree/">Diameter of Binary Tree</a></td><td>★★★</td><td><strong>返す値と更新する値が違う</strong>——木の最大の山</td></tr>
+    <tr><td>230</td><td><a href="https://leetcode.com/problems/kth-smallest-element-in-a-bst/">Kth Smallest in a BST</a></td><td>★★</td><td>BST ＋ inorder（94 の再利用）</td></tr>
+    <tr><td>98</td><td><a href="https://leetcode.com/problems/validate-binary-search-tree/">Validate BST</a></td><td>★★★</td><td><strong>親だけ見ては足りない</strong>＝上下限を渡す</td></tr>
+    <tr><td>78</td><td><a href="https://leetcode.com/problems/subsets/">Subsets</a></td><td>★★</td><td><strong>バックトラックの入口</strong>：選ぶ／選ばないの2分岐</td></tr>
+  </tbody>
+</table>
+
+<h2>8/24 – 8/30 ｜ バックトラック ② ＋ 初回の模擬面接（5問＋面接）</h2>
+<p class="muted">問題数を意図的に減らしています。<strong>模擬面接がこの週の主目的</strong>です。</p>
+<table>
+  <thead><tr><th>#</th><th>問題</th><th>★</th><th>狙い</th></tr></thead>
+  <tbody>
+    <tr><td>39</td><td><a href="https://leetcode.com/problems/combination-sum/">Combination Sum</a></td><td>★★★</td><td>同じ要素を何度も使える＝<strong>次の探索開始位置</strong>が本体</td></tr>
+    <tr><td>46</td><td><a href="https://leetcode.com/problems/permutations/">Permutations</a></td><td>★★★</td><td>使用済みの管理。順序が意味を持つ型</td></tr>
+    <tr><td>90</td><td><a href="https://leetcode.com/problems/subsets-ii/">Subsets II</a></td><td>★★★</td><td><strong>重複の除去</strong>——バックトラックの最頻の詰まり所</td></tr>
+    <tr><td>235</td><td><a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/">LCA of a BST</a></td><td>★★★</td><td>BST の性質で降りる。二分探索の考え方の再登場</td></tr>
+    <tr><td>105</td><td><a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/">Construct Tree from Preorder+Inorder</a></td><td>★★★</td><td>144/94 の逆。木の総復習として</td></tr>
+  </tbody>
+</table>
+<p class="muted"><strong>不採用</strong>：106（105 とほぼ同型）。<strong>模擬面接</strong>は
+<a href="https://www.pramp.com/">Pramp</a>（無料）または <a href="https://www.interviewing.io/">interviewing.io</a>。</p>
+
+<h2>8/31 – 9/06 ｜ ヒープ ＋ 連結リスト（8問）</h2>
+<p>どちらも<strong>短期集中で終わらせる</strong>トピック（ヒープ＝★2中コスト、連結リスト＝★1低コスト）。</p>
+<table>
+  <thead><tr><th>#</th><th>問題</th><th>★</th><th>狙い</th></tr></thead>
+  <tbody>
+    <tr><td>215</td><td><a href="https://leetcode.com/problems/kth-largest-element-in-an-array/">Kth Largest Element</a></td><td>★★★</td><td><strong>Top-K の型</strong>：サイズ K の最小ヒープを維持する</td></tr>
+    <tr><td>2462</td><td><a href="https://leetcode.com/problems/total-cost-to-hire-k-workers/">Total Cost to Hire K Workers</a></td><td>★★★</td><td>ヒープ2本を同時に回す。<code>heapq</code> の運用</td></tr>
+    <tr><td>23</td><td><a href="https://leetcode.com/problems/merge-k-sorted-lists/">Merge k Sorted Lists</a></td><td>★★★</td><td><strong>ヒープと連結リストの合流点</strong>。21 の後に</td></tr>
+    <tr><td>1290</td><td><a href="https://leetcode.com/problems/convert-binary-number-in-a-linked-list-to-integer/">Convert Binary Number in a Linked List</a></td><td>★★</td><td>連結リストの入口。走査だけ</td></tr>
+    <tr><td>141</td><td><a href="https://leetcode.com/problems/linked-list-cycle/">Linked List Cycle</a></td><td>★★</td><td><strong>速い／遅い2つのポインタ</strong></td></tr>
+    <tr><td>21</td><td><a href="https://leetcode.com/problems/merge-two-sorted-lists/">Merge Two Sorted Lists</a></td><td>★★</td><td><strong>ダミーヘッド</strong>のイディオム</td></tr>
+    <tr><td>19</td><td><a href="https://leetcode.com/problems/remove-nth-node-from-end-of-list/">Remove Nth Node From End</a></td><td>★★</td><td>境界がすべて。<a href="./boundary-checklist.html">境界チェックリスト</a>の出番</td></tr>
+    <tr><td>234</td><td><a href="https://leetcode.com/problems/palindrome-linked-list/">Palindrome Linked List</a></td><td>★★★</td><td>中点を見つけて反転する＝連結リストの総合</td></tr>
+  </tbody>
+</table>
+<p class="muted"><strong>不採用</strong>：146 LRU Cache / 1472 Design Browser History（設計寄りで高コスト・★1トピック）、2487 / 2130 / 2095 / 203 / 2。
+余力が出たら 2095（中点）→ 2（繰り上がり）。</p>
+
+<h2>9/07 – 9/13 ｜ グラフ（7問）</h2>
+<p><strong>grid の BFS / DFS に限定</strong>。★2・高コストなので、ここで広げると DP と同じ罠になります。</p>
+<table>
+  <thead><tr><th>#</th><th>問題</th><th>★</th><th>狙い</th></tr></thead>
+  <tbody>
+    <tr><td>200</td><td><a href="https://leetcode.com/problems/number-of-islands/">Number of Islands</a></td><td>★★</td><td><strong>grid DFS の型</strong>＋訪問済みの管理</td></tr>
+    <tr><td>695</td><td><a href="https://leetcode.com/problems/max-area-of-island/">Max Area of Island</a></td><td>★★</td><td>200 に戻り値を足すだけ。差分学習</td></tr>
+    <tr><td>994</td><td><a href="https://leetcode.com/problems/rotting-oranges/">Rotting Oranges</a></td><td>★★★</td><td><strong>多点同時スタートの BFS</strong>＝最短時間。102 の再利用</td></tr>
+    <tr><td>130</td><td><a href="https://leetcode.com/problems/surrounded-regions/">Surrounded Regions</a></td><td>★★</td><td><strong>外側から塗る</strong>という反転。発想の型</td></tr>
+    <tr><td>417</td><td><a href="https://leetcode.com/problems/pacific-atlantic-water-flow/">Pacific Atlantic Water Flow</a></td><td>★★★</td><td>130 の2問目。逆向きに辿る</td></tr>
+    <tr><td>207</td><td><a href="https://leetcode.com/problems/course-schedule/">Course Schedule</a></td><td>★★</td><td><strong>★2＝安いので採用</strong>。実体は「DFS で閉路検出」＝木の再帰の延長</td></tr>
+    <tr><td>2101</td><td><a href="https://leetcode.com/problems/detonate-the-maximum-bombs/">Detonate the Maximum Bombs</a></td><td>★★★</td><td>grid でないグラフ＝<strong>自分で辺を作る</strong></td></tr>
+  </tbody>
+</table>
+<p class="muted"><strong>不採用（意図的）</strong>：743 Network Delay Time（Dijkstra）、684 Redundant Connection（Union-Find）、
+210 Course Schedule II（順序の復元）、863。いずれも新しいデータ構造・アルゴリズムを1つずつ要求し、
+★2トピックには重すぎます。<strong>ここが遅れの吸収先</strong>でもあります。</p>
+
+<h2>9/14 – 9/20 ｜ 配列と文字列 ②（再投資枠）＋ DP の床（9問）</h2>
+<p><strong>回収した約15時間の行き先。</strong>既習パターンの2〜3問目を、<strong>パターン名を伏せて混ぜて</strong>出します（interleaving）。
+面接で問われるのは「どのパターンか」を自分で当てる技能で、単元別に解いている限り測れません。</p>
+<table>
+  <thead><tr><th>#</th><th>問題</th><th>★</th><th>狙い</th></tr></thead>
+  <tbody>
+    <tr><td>128</td><td><a href="https://leetcode.com/problems/longest-consecutive-sequence/">Longest Consecutive Sequence</a></td><td>★★★</td><td>ハッシュ。<strong>⑥の償却論法が本体</strong>（<a href="../lessons/0004-amortized-argument.html">Lesson 04</a>）</td></tr>
+    <tr><td>219</td><td><a href="https://leetcode.com/problems/contains-duplicate-ii/">Contains Duplicate II</a></td><td>★★</td><td>窓 ＋ ハッシュの合成</td></tr>
+    <tr><td>904</td><td><a href="https://leetcode.com/problems/fruit-into-baskets/">Fruit Into Baskets</a></td><td>★★★</td><td>可変長窓。<code>is_invalid</code> の導出（<a href="../lessons/0005-deriving-is-invalid.html">Lesson 05</a>）</td></tr>
+    <tr><td>209</td><td><a href="https://leetcode.com/problems/minimum-size-subarray-sum/">Minimum Size Subarray Sum</a></td><td>★★★</td><td><strong>最長ではなく最短</strong>の窓＝縮め方が逆</td></tr>
+    <tr><td>2090</td><td><a href="https://leetcode.com/problems/k-radius-subarray-averages/">K Radius Subarray Averages</a></td><td>★★</td><td>固定長窓 ＋ 境界（643 の2問目）</td></tr>
+    <tr><td>48</td><td><a href="https://leetcode.com/problems/rotate-image/">Rotate Image</a></td><td>★★★</td><td><strong>行列の添字操作</strong>——未着手の型。転置＋反転</td></tr>
+    <tr><td>70</td><td><a href="https://leetcode.com/problems/climbing-stairs/">Climbing Stairs</a></td><td>★★</td><td rowspan="3"><strong>DP の床</strong>。★2の安い3問だけ。<br>「前の答えから今の答えを作る」1行の漸化式に集中する</td></tr>
+    <tr><td>746</td><td><a href="https://leetcode.com/problems/min-cost-climbing-stairs/">Min Cost Climbing Stairs</a></td><td>★★</td></tr>
+    <tr><td>198</td><td><a href="https://leetcode.com/problems/house-robber/">House Robber</a></td><td>★★★</td></tr>
+  </tbody>
+</table>
+
+<h2>9/21 – 9/30 ｜ 総復習 ＋ 模擬面接2〜3回</h2>
+<p><strong>新規問題は原則入れません。</strong>間違えた問題の解き直しと、口頭説明の練習に充てます。
+それでも余力があれば、この順で：</p>
+<ol>
+  <li><a href="https://leetcode.com/problems/unique-paths/">62. Unique Paths</a>（★★）
+      ——<strong>2-D DP の代表を1問だけ</strong>。格子は <a href="../lessons/0012-the-erased-column.html">Lesson 12</a> で既に使っています</li>
+  <li><a href="https://leetcode.com/problems/coin-change/">322. Coin Change</a>（★★★）——DP の最頻出</li>
+  <li><a href="https://leetcode.com/problems/3sum/">15. 3Sum</a> の再演（two pointers の総合）</li>
+</ol>
+
+<div class="aside">
+  <span class="label">DP について、はっきり言っておくこと</span>
+  <p>提供リストには DP が約25問（2-D、ナップサック、株の売買まで）並んでいて、すべて「重要度：高」です。
+  それを<strong>3問に削っています。</strong>これは意図的な賭けです——
+  ROI表が DP を「コスト最高・ROI最低」と評価しており、残り90時間でDPを網羅すると
+  <strong>★5の配列と文字列と、口頭説明の練習が確実に犠牲になる</strong>からです。<br>
+  この賭けが外れる条件は1つ：<strong>志望先の選考が実質DP勝負だった場合</strong>。
+  もし選考情報や過去問でその兆候が出たら、すぐ言ってください。その時点で配分を組み替えます。</p>
+</div>
+
+<h2>不採用にした問題（記録）</h2>
+
+<p>「なぜ解かないか」を残しておかないと、あとで不安になって拾い直し、計画が崩れます。</p>
+
+<ul>
+  <li><strong>既習または易しすぎる</strong>：1512 / 1 / 217 / 242 / 49 / 125 / 167 / 27 / 392 / 345 / 1920 /
+      643 / 3 / 424（すでに <a href="../lessons/0001-hash-map-collapse.html">Lesson 01</a>〜16 で扱済）</li>
+  <li><strong>同一パターンの4問目以降</strong>：1002 / 451 / 442 / 448 / 287 / 2653 / 3026 / 1685 / 210 / 106</li>
+  <li><strong>比較関数・ソート順の細工が本体</strong>（頻度の割に転用が効かない）：791 / 2191 / 179 / 953</li>
+  <li><strong>行列の応用</strong>（48 で型は取れる）：54 / 1886 / 1572</li>
+  <li><strong>設計寄りで高コスト</strong>：146 / 1472 / 981</li>
+  <li><strong>MISSION の out of scope（競技プログラミング）</strong>：Aizu の 0-1 Knapsack / Knapsack / Largest Square</li>
+  <li><strong>DP の2-D以降</strong>：72 / 1143 / 97 / 115 / 63 / 647 / 343 / 1027 / 494 / 152 / 91 / 139 / 213 / 983 / 2952 / 714 / 309</li>
+</ul>
+
+<div class="footer">
+  <p>関連：<a href="./study-plan.html">学習計画 v2</a> ·
+     <a href="./interview-protocol.html">面接プロトコル</a> ·
+     <a href="./boundary-checklist.html">境界チェックリスト</a> ·
+     <a href="./glossary.html">用語集</a></p>
+  <p>この選抜は固定ではありません。<strong>次の見直しは8月下旬の初回模擬面接の直後。</strong>
+  問題を足したい／減らしたいときは私に言ってください——足すなら、どれを落とすかも一緒に決めます。</p>
+</div>

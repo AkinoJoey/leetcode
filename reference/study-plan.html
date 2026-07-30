@@ -1,91 +1,142 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reference — 10週間の学習計画</title>
+<title>Reference — 学習計画（v2・ROI再配分版）</title>
 <link rel="stylesheet" href="../assets/lesson.css">
 
-<p class="eyebrow">Reference · 2026-07-19 → 09-30</p>
-<h1>10週間の学習計画</h1>
-<p class="subtitle">週10時間 × 10週 ＝ 約100時間。面接は10月以降。</p>
-
-<h2>前提となる判断</h2>
-
-<p>100時間で <a href="https://neetcode.io/practice?tab=neetcode150">NeetCode 150</a> を完走するのは現実的ではありません。
-1問あたり解答＋復習で平均40〜50分かかるため、100時間はおよそ<strong>120問ぶん</strong>。復習と模擬面接の時間を引くと
-実質<strong>90〜100問</strong>です。</p>
-
-<p>したがって方針は<strong>網羅ではなく被覆</strong>——
-<a href="https://www.techinterviewhandbook.org/grind75/">Grind 75</a> / Blind 75 相当のコアを確実に取り、
-余力のあるパターンだけ2問目・3問目に広げます。<strong>全パターンに一度は触れる</strong>ことを、
-一部のパターンを深掘りすることより優先してください。取りこぼしたパターンが面接で出ると0点ですが、
-浅くても触れていれば戦えます。</p>
+<p class="eyebrow">Reference · v2（2026-07-30 改訂）· 残り 7/31 → 09-30</p>
+<h1>学習計画 v2 — ROIによる再配分</h1>
+<p class="subtitle">志望先は<strong>日系メガベンチャー中心</strong>。残り約9週・約90時間。</p>
 
 <div class="aside">
-  <span class="label">週の型</span>
-  <p><strong>平日（1h）</strong>＝ レッスンで新パターンを入れる ＋ その場で1問。<br>
-  <strong>週末（2〜3h）</strong>＝ 復習（前週の問題を<em>解き直す</em>、読み返さない）＋ 新規2〜3問。
-  週末は複数パターンを混ぜること（interleaving）。混ぜたほうが定着します。</p>
+  <span class="label">v1 からの変更点（3行で）</span>
+  <p><strong>DP を約20時間 → 約4時間に圧縮</strong>（2-D DP を全削除、1-D は「床」の3問のみ）。<br>
+  <strong>再帰／バックトラック法を前倒し</strong>（第6週相当 → 8月前半）。<br>
+  <strong>回収した約15時間はすべて「配列と文字列」の問題数へ</strong>。順序は変えていない。</p>
 </div>
 
-<h2>スケジュール</h2>
+<h2>なぜ引き直したか</h2>
+
+<p>v1 は <a href="https://neetcode.io/roadmap">NeetCode Roadmap</a> の依存順をそのまま週割りにしたもので、
+<strong>各トピックに何時間かけるか</strong>を明示的に決めていませんでした。結果 DP に2週（約20時間）を積んでいました。
+日系メガベンチャーの出題実態では DP は<strong>習得コストが最も高く、頻度が最も低い</strong>トピックです。
+ここが v1 最大の誤配分です。</p>
 
 <table>
-  <thead><tr><th>週</th><th>期間</th><th>トピック</th><th>目安</th></tr></thead>
+  <thead><tr><th>トピック</th><th>習得コスト</th><th>ROI</th><th>v1</th><th>v2</th></tr></thead>
   <tbody>
-    <tr><td>1</td><td>7/20 – 7/26</td><td>Arrays &amp; Hashing<span style="color:var(--muted)">（Lesson 01 済）</span> → Two Pointers</td><td>8問</td></tr>
-    <tr><td>2</td><td>7/27 – 8/02</td><td>Sliding Window → Stack</td><td>9問</td></tr>
-    <tr><td>3</td><td>8/03 – 8/09</td><td>Binary Search → Linked List</td><td>10問</td></tr>
-    <tr><td>4</td><td>8/10 – 8/16</td><td>Trees（DFS / BFS の型）</td><td>9問</td></tr>
-    <tr><td>5</td><td>8/17 – 8/23</td><td>Trees 続き → Heap / Priority Queue</td><td>9問</td></tr>
-    <tr><td>6</td><td>8/24 – 8/30</td><td>Backtracking ＋ <strong>初回の模擬面接</strong></td><td>8問</td></tr>
-    <tr><td>7</td><td>8/31 – 9/06</td><td>Graphs（BFS / DFS / Union-Find の触り）</td><td>9問</td></tr>
-    <tr><td>8</td><td>9/07 – 9/13</td><td>1-D Dynamic Programming</td><td>9問</td></tr>
-    <tr><td>9</td><td>9/14 – 9/20</td><td>2-D DP ＋ Intervals / Greedy</td><td>9問</td></tr>
-    <tr><td>10</td><td>9/21 – 9/30</td><td>総復習（間違えた問題の解き直し）＋ <strong>模擬面接2〜3回</strong></td><td>—</td></tr>
+    <tr><td>配列と文字列</td><td>中</td><td>★★★★★</td><td>週1のみ</td><td><strong>常設枠＋再投資ブロック</strong></td></tr>
+    <tr><td>再帰 / バックトラック法</td><td>高</td><td>★★★</td><td>週6</td><td><strong>8月前半に前倒し</strong></td></tr>
+    <tr><td>ヒープ / 優先度付きキュー</td><td>中</td><td>★★</td><td>週5</td><td>据え置き（2〜3問）</td></tr>
+    <tr><td>二分探索</td><td>高</td><td>★★</td><td>週3</td><td><strong>支払い済み → 打ち止め</strong></td></tr>
+    <tr><td>二分木</td><td>中</td><td>★★</td><td>週4–5</td><td>据え置き</td></tr>
+    <tr><td>グラフ</td><td>高</td><td>★★</td><td>週7</td><td><strong>BFS/DFS だけに限定</strong></td></tr>
+    <tr><td>連結リスト</td><td>低</td><td>★</td><td>週3</td><td>削らない（低コストの保険）</td></tr>
+    <tr><td>動的計画法</td><td>高</td><td>★</td><td><strong>週8–9（約20h）</strong></td><td><strong>1-D の3問のみ（約4h）</strong></td></tr>
   </tbody>
 </table>
 
-<p>順序は <a href="https://neetcode.io/roadmap">NeetCode Roadmap</a> の依存関係に従っています。
-後半のトピックは前半の上に積み上がるので、<strong>順番を入れ替えないこと</strong>。
-特に Graphs は Trees の、DP は再帰の理解を前提にします。</p>
-
-<h2>模擬面接（最重要）</h2>
-
-<p>ミッションは「<em>考えを声に出しながら</em>解ききる」ことです。
-問題を解く練習と、解きながら説明する練習は<strong>別の技能</strong>で、後者は独学では伸びません。
-現時点で未経験である以上、ここが最大のリスクです。</p>
-
-<ul>
-  <li><strong>第6週（8月下旬・約50問時点）に初回を必ず入れる</strong>。
-      上達してからではなく、下手なうちに1回受けるのが目的。何ができないかが分かれば残り4週間で直せます。</li>
-  <li>第10週に2〜3回。本番の1〜2週間前に「本番の感触」を作っておく。</li>
-  <li>場所：<a href="https://www.interviewing.io/">interviewing.io</a>（実在のエンジニア、匿名） /
-      <a href="https://www.pramp.com/">Pramp</a>（無料・ピア同士）。無料で始めるなら Pramp。</li>
-</ul>
-
-<div class="aside">
-  <span class="label">代替案</span>
-  <p>他人との模擬面接に抵抗があるなら、<strong>画面録画しながら独りで喋る</strong>だけでも効果があります。
-  沈黙した時間と、詰まったときに何を言ったかが客観的に見えます。ゼロよりはるかにマシですが、
-  第10週までには一度は人を相手にしてください。</p>
-</div>
-
-<h2>進捗が遅れたときの切り方</h2>
-
-<p>10週間の計画は必ずどこかで崩れます。崩れたとき、削る順序を先に決めておきます。</p>
+<h2>ROI表の読み方——3つの注意</h2>
 
 <ol>
-  <li><strong>削ってよい</strong>：各パターンの3問目以降。Hard 問題。Tries、Bit Manipulation、高度な数論。</li>
-  <li><strong>削ってよい</strong>：2-D DP（第9週）。頻度の割に習得コストが高い。1-D DP を優先。</li>
-  <li><strong>絶対に削らない</strong>：模擬面接。Trees / Graphs の基本。復習の時間。</li>
+  <li><strong>表は「頻度 ÷ 習得コスト」だが、あなたが最適化すべきは「あと何時間で伸びるか」（＝限界ROI）。</strong>
+      配列と文字列は★5ですが、<a href="../lessons/0001-hash-map-collapse.html">Lesson 01</a>〜09 で最も進んだ領域です。
+      ★5の枠は「新パターンの追加」ではなく<strong>2問目・3問目の横展開と口頭練習の素材</strong>に使います。</li>
+  <li><strong>★1は「ゼロでよい」ではない。</strong>DP が1問出て完全未経験なら、その面接は0点です。
+      削るのは<strong>2-D DP</strong>であって DP そのものではありません。1-D の3問（70 Climbing Stairs / 746 Min Cost Climbing Stairs / 198 House Robber
+      ——いずれも習得コストの低い問題）は<strong>床</strong>として残します。</li>
+  <li><strong>表にスタックと区間が無い。</strong>単調スタックは実質「配列と文字列」の一部で、頻出です。
+      v1 の第2週でスキップされているので、v2 では配列ブロックの中で拾い直します。</li>
+</ol>
+
+<div class="aside">
+  <span class="label">配分の議論が動かさないもの</span>
+  <p>ミッションは「<em>考えを声に出しながら</em>初見の Medium を解ききる」ことです。
+  どのトピックに何時間かけるかを最適化しても、<strong>口頭説明が未経験であるというリスクは1ミリも減りません</strong>。
+  模擬面接（8月下旬に初回・9月下旬に2〜3回）は v1 のまま維持し、<strong>再配分の対象外</strong>とします。</p>
+</div>
+
+<h2>スケジュール v2</h2>
+
+<p>各週に割り当てた<strong>具体的な問題は <a href="./problem-set.html">選抜問題セット</a></strong>にあります（全56問、
+不採用にした問題とその理由も記録済み）。</p>
+
+<table>
+  <thead><tr><th>期間</th><th>トピック</th><th>目安</th></tr></thead>
+  <tbody>
+    <tr><td>7/31 – 8/02</td><td><strong>二分探索の締め</strong>：型C（33 / 153、<a href="../lessons/0016-half-of-it-is-always-sorted.html">Lesson 16</a> の課題）＋「答えを二分探索」1問 → <strong>打ち止め</strong></td><td>3問</td></tr>
+    <tr><td>8/03 – 8/09</td><td><strong>配列と文字列 ①</strong>（★5）：prefix sum ／ 単調スタック ／ 区間のマージ</td><td>8問</td></tr>
+    <tr><td>8/10 – 8/16</td><td><strong>再帰の土台</strong>（前倒し）→ 二分木（DFS / BFS の型）</td><td>8問</td></tr>
+    <tr><td>8/17 – 8/23</td><td>二分木 続き ＋ <strong>バックトラック法 ①</strong></td><td>8問</td></tr>
+    <tr><td>8/24 – 8/30</td><td>バックトラック法 ② ＋ <strong>初回の模擬面接（死守）</strong></td><td>5問</td></tr>
+    <tr><td>8/31 – 9/06</td><td>ヒープ / 優先度付きキュー（Top-K の型）＋ <strong>連結リスト</strong>（低コスト・短期集中）</td><td>8問</td></tr>
+    <tr><td>9/07 – 9/13</td><td>グラフ：<strong>grid と隣接リストの BFS / DFS のみ</strong>（＋207 Course Schedule。Union-Find・Dijkstra・順序の復元は切る）</td><td>7問</td></tr>
+    <tr><td>9/14 – 9/20</td><td><strong>配列と文字列 ②（再投資枠）</strong>：★5トピックの2〜3問目を interleaving で ＋ <strong>1-D DP の床3問</strong></td><td>9問</td></tr>
+    <tr><td>9/21 – 9/30</td><td>総復習（間違えた問題の解き直し）＋ <strong>模擬面接2〜3回</strong></td><td>—</td></tr>
+  </tbody>
+</table>
+
+<p><strong>順序は v1 から変えていません。</strong>後半のトピックは前半の上に積み上がります——
+グラフは木の上に、バックトラック法は再帰の上に建ちます。<strong>入れ替えないこと。</strong>
+再帰を前倒ししたのは順序の変更ではなく、<strong>高コストなものを早く始めるため</strong>です。</p>
+
+<h2>二分探索を打ち止めにする理由</h2>
+
+<p>ROI は★2、習得コストは「高」——つまり<strong>これ以上の投資は割に合わない</strong>トピックです。
+ただしすでに <a href="../lessons/0014-the-rate-not-the-reason.html">Lesson 14</a>〜16 で
+型A（厳密一致）・型B（境界）・型C（回転配列）を通しました。<strong>コストは支払い済み</strong>なので、
+ここで止めるのが正しい。型D以降（2次元、`k`番目、二分探索の入れ子）には進みません。</p>
+
+<p>そして二分探索で得たものの本体は、実は二分探索ではありません——
+<strong>⓪前提の名指し ／ ②素朴解とボトルネック ／ ⑥量と行の照合</strong>という
+<a href="./interview-protocol.html">面接プロトコル</a>の手続きが、この3レッスンで「獲得済み」まで来ています。
+これは全トピックで使い回せます。<strong>★2のトピックで★5の道具が手に入った</strong>ので、投資は回収済みです。</p>
+
+<h2>「配列と文字列」に何を入れるか</h2>
+
+<p>★5枠なのに v1 では1週しかありませんでした。v2 では2ブロック（8/03週・9/14週）に置きます。
+すでに済んでいるもの／これから足すものの区別：</p>
+
+<ul>
+  <li><strong>済</strong>：ハッシュによる O(n²)→O(n)（<a href="../lessons/0001-hash-map-collapse.html">01</a>）／
+      sliding window（<a href="../lessons/0002-sliding-window.html">02</a>〜06）／
+      two pointers（<a href="../lessons/0007-two-pointers.html">07</a>〜09）</li>
+  <li><strong>①で足す</strong>：prefix sum（区間和・部分和が K）／単調スタック（Next Greater・Daily Temperatures）／
+      区間のマージ・重なり判定</li>
+  <li><strong>②で足す</strong>：既習パターンの2〜3問目。<strong>パターン名を伏せて混ぜて出す</strong>（interleaving）。
+      面接で必要なのは「どのパターンか」を自分で当てる技能なので、単元別に解いている限り測れません。</li>
+</ul>
+
+<h2>進捗が遅れたときの切り方（v2）</h2>
+
+<p>v1 の切り方は「2-D DP から」でしたが、v2 では<strong>2-D DP は最初から入っていません</strong>。
+そこで削る順序を引き直します。</p>
+
+<ol>
+  <li><strong>削ってよい</strong>：各パターンの3問目以降。Hard 問題。グラフの応用（Union-Find 等）。1-D DP の3問目。</li>
+  <li><strong>削ってよい</strong>：バックトラック法②（8/24週）。★3だが高コストなので、遅れの吸収先はここ。</li>
+  <li><strong>絶対に削らない</strong>：模擬面接。二分木の基本。復習の時間。<strong>配列と文字列②の再投資枠</strong>。</li>
 </ol>
 
 <p>復習を削って新規問題を増やすのは、いちばんやりがちで、いちばん損な選択です。
-解いた問題を解き直さないと<strong>storage strength</strong>（長期保持）が育たず、面接当日に何も出てきません。</p>
+実際、<a href="../learning-records/0022-the-picture-shows-what-was-not-called.md">LR-0022</a> の時点で
+Lesson 11 の内容が3セッション連続で retrieval に出てきませんでした。<strong>これは復習量が足りていない兆候です。</strong></p>
+
+<h2>主資料</h2>
+
+<ul>
+  <li><a href="https://www.techinterviewhandbook.org/coding-interview-study-plan/">Tech Interview Handbook — Coding interview study plan</a>
+      ：残り時間別の study plan。トピックの優先度付けの根拠として最も信頼できる。</li>
+  <li><a href="https://www.techinterviewhandbook.org/grind75/">Grind 75</a>
+      ：使える時間を入れると問題リストが出る。<strong>週10時間・9週で設定して、本計画と突き合わせること。</strong></li>
+  <li><a href="https://neetcode.io/roadmap">NeetCode Roadmap</a>：依存順の根拠。順序はここに従う。</li>
+</ul>
 
 <div class="footer">
   <p>関連：<a href="../MISSION.md">Mission</a> ·
-     <a href="../RESOURCES.md">Resources</a> ·
-     <a href="../lessons/0001-hash-map-collapse.html">Lesson 01</a> ·
-     <a href="./python-hash-cheatsheet.html">Python ハッシュ構造チートシート</a></p>
-  <p>この計画は固定ではありません。進み方を見て隔週で見直します。遅れたら私に言ってください——調整します。</p>
+     <a href="./interview-protocol.html">面接プロトコル</a> ·
+     <a href="./binary-search-template.html">二分探索テンプレート</a> ·
+     <a href="./glossary.html">用語集</a></p>
+  <p>この計画も固定ではありません。<strong>次の見直しは8月下旬の初回模擬面接の直後</strong>——
+  そこで初めて「口頭説明」の実力が測れるので、測ってから残り5週の配分を決めます。
+  疑問があれば私に聞いてください。教師として答えます。</p>
 </div>
