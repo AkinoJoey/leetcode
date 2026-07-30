@@ -113,6 +113,59 @@ i = bisect_left(nums, x)                  # x を挿入できる最も左の位�
 found = i &lt; len(nums) and nums[i] == x    # 存在判定はこの一行が必要
 cnt = bisect_right(nums, x) - bisect_left(nums, x)   # x の個数</code></pre>
 
+<h3>±1 が付くかは、左右では決まらない</h3>
+
+<p>
+「左は <code>+1</code>、右は無し」と<strong>位置で覚えると型が変わった瞬間に崩れる</strong>。
+判定基準はひとつだけ——<strong>その枝で <code>mid</code> が候補として生き残るか</strong>。
+</p>
+
+<table class="rule">
+  <tr><th>その枝で <code>mid</code> について分かったこと</th><th><code>mid</code> は候補か</th><th>更新</th></tr>
+  <tr><td>答えではないと<strong>確定した</strong></td><td class="k">消える</td><td class="k">mid ± 1（候補から外す）</td></tr>
+  <tr><td>答えかもしれない</td><td class="k">残る</td><td class="k">mid（±1 を付けない）</td></tr>
+</table>
+
+<p>
+③で「<code>mid</code> はまだ候補」と書いたなら、コードは <code>right = mid</code> になる。
+<strong>③とコードは直結している</strong>——③が書けていれば ±1 で迷う余地はない。
+</p>
+
+<h3>配列が無い型（述語ベース・278 型）</h3>
+
+<p>
+二分探索に必要なのは配列ではなく<strong>単調性</strong>。真偽が
+<code>✗ ✗ ✗ ✓ ✓ ✓</code> と並び、<strong>一度 ✓ になったら ✗ に戻らない</strong>——これだけあればよい。
+⓪では「ソート済み」ではなく、<strong>何が、どういう意味で単調か</strong>を書く。
+</p>
+
+<pre><code>def first_true(lo, hi, pred):
+    """pred(i) が True となる最小の i。pred は単調（False…False True…True）。"""
+    while lo &lt; hi:
+        mid = (lo + hi) // 2
+        if pred(mid):
+            hi = mid                # mid は「最初の True」かもしれない → 残す
+        else:
+            lo = mid + 1            # mid は False と確定 → 消す
+    return lo</code></pre>
+
+<div class="aside">
+<span class="label">述語ベース特有の落とし穴：図に描いた ✗ は、まだ呼んでいない</span>
+<p>
+配列問題（35 など）では値が最初から全部見えているので、
+<code>✗ ✗ ✓ ✓ ✓</code> の図をそのまま根拠に使ってよかった。
+<strong>述語ベースでは、呼んだ 1 点以外はすべて未知</strong>。
+</p>
+<pre><code>version    1    2    3    4    5    6
+真の姿      ✗    ✗    ✗    ✓    ✓    ✓     ← 説明用の図。プログラムには見えない
+判明        ?    ?    ?    ✓    ?    ?     ← mid=4 を呼んだ直後に知っていること</code></pre>
+<p>
+③の根拠に使ってよいのは <strong>下の行だけ</strong>。
+「1,2,3 は ✗ だから消せる」は<strong>まだ呼んでいない情報を使っている</strong>。
+消えるのは <code>5..n</code> の側——単調性より必ず bad だが、<strong>4 が既に bad なので「最初」ではありえない</strong>。
+</p>
+</div>
+
 <h2>5. 計算量（⑥）の言い方</h2>
 
 <blockquote>
