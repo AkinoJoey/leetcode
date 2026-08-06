@@ -26,6 +26,12 @@
   問題数を稼ぐのではなくパターンを内在化せよ、という方法論。20〜30分詰まったら解答を読む、という時間設計の根拠。
   使いどころ：学習の進め方そのものに迷ったとき。
 
+- [USACO Guide — Binary Search（Silver）](https://usaco.guide/silver/binary-search)
+  述語 `f(x)` を軸にした二分探索の解説。「単調関数上の二分探索」「`f(x) = true` となる最小／最大の `x`」の
+  4節構成で、答えを二分探索する型（875 / 1011）の一次資料として最も筋が通っている。
+  使いどころ：**Lesson 17 の主資料**。「最小」と「最大」の書き分けを確認するとき。
+  注意：競技プログラミング向けなので C++/Java 中心。式と考え方だけ読めばよい。
+
 ## Wisdom (Communities)
 
 - [r/leetcode](https://reddit.com/r/leetcode)

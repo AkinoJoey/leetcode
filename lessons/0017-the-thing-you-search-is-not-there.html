@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 17 — 探すものは、配列の中に無い</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+/* 冒頭の retrieval を本編と視覚的に切り離す（Lesson 14〜16 と同じ） */
+.recall { border: 1px solid var(--rule); border-radius: 5px; padding: 1.2rem 1.3rem .6rem; margin: 2rem 0 3rem; }
+.recall > .label { font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: .6rem; }
+/* 型A/B と型D で「何を二分探索しているか」を対比する表 */
+table.ab td.k, table.ab th.k { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">Lesson 17 · binary search 型D（答えを二分探索）· 二分探索の締め</p>
+<h1>探すものは、配列の中に無い</h1>
+<p class="subtitle">875 では <code>piles</code> をソートしても何も起きません。ソートしたい気持ちが空振りするのが、この型の入口です。</p>
+
+<div class="recall">
+  <span class="label">まず思い出す（記述式・2問）</span>
+
+  <div class="check" data-answer="幅" data-alt="幅は減る一方|幅が減る|幅は増えない|幅が減ること">
+    <p class="check-q">
+      11. Container With Most Water。低いほうの板を捨てる根拠は<strong>2つの要素</strong>で閉じています。
+      1つは「<code>min(height[l], height[r]) × 幅</code> が上限であること」。<strong>もう1つは何か</strong>。
+      キーになる語を<strong>漢字1文字</strong>で。
+    </p>
+    <input class="check-in" type="text" placeholder="漢字1文字">
+    <button class="check-btn">確認</button>
+    <p class="check-fb">
+      <strong>幅（幅は減る一方）。</strong>上限だけでは捨てられません——
+      「これから作れる組は<strong>すべて幅が今より小さく</strong>、水位は <code>min</code> のまま増えない」まで言って初めて閉じます。
+      <strong>③は「上限」＋「その上限がこれ以上良くならない理由」の2要素で常に1組</strong>
+      （<a href="../learning-records/0022-the-picture-shows-what-was-not-called.md">LR-0022</a>）。
+      片方だけで止まる癖は 33 でも出ました（下限が落ちた）。今日も③でここを見ます。
+    </p>
+  </div>
+
+  <div class="check" data-answer="nums[r]" data-alt="numsr|nums[right]|numsright|右端|nums[r]の値">
+    <p class="check-q">
+      33. Search in Rotated Sorted Array の <code>else</code> 枝（右半分 <code>[mid, r]</code> がソート済みの側）。
+      下限を与えるのは <code>nums[mid]</code>。<strong>上限を与えるのは何か</strong>。
+    </p>
+    <input class="check-in" type="text" placeholder="式で">
+    <button class="check-btn">確認</button>
+    <p class="check-fb">
+      <strong><code>nums[r]</code>。</strong>だから右枝の条件は
+      <code>nums[mid] &lt; target &lt;= nums[r]</code>。ここを <code>nums[mid] &gt; target &gt; nums[r]</code> と書くと
+      <code>nums[mid] &gt; nums[r]</code> を要求することになり<strong>恒偽</strong>——右半分を一度も見ません
+      （<a href="../learning-records/0024-the-other-branch-was-never-written.md">LR-0024</a>）。
+      上の1問目と<strong>同じ欠落の具体形</strong>です：根拠が2要素で閉じていない。
+    </p>
+  </div>
+</div>
+
+<h2>1. ソートしたい気持ちが、空振りする</h2>
+
+<blockquote>
+875. Koko Eating Bananas — <code>piles[i]</code> 本のバナナの山が <code>n</code> 個。
+ココは<strong>1時間に1つの山だけ</strong>を選んで食べる。速さ <code>k</code> は<strong>1時間に食べられる上限の本数</strong>。
+その山に <code>k</code> 本以上あれば <code>k</code> 本食べ、<strong>残りが <code>k</code> 本未満ならそれを食べきって、その1時間は終わり</strong>。
+警備員が <code>h</code> 時間後に戻る。<code>h</code> 時間以内に全部食べ終えられる<strong>最小の <code>k</code></strong> を返す。
+</blockquote>
+
+<div class="aside">
+<span class="label">問題文で唯一ひねってあるのは「余った時間を次の山に使えない」ところ</span>
+<p>
+時間が余っても<strong>別の山には移れない</strong>。だから1つの山を食べきる時間は
+<code>ceil(piles[i] / k)</code>——<strong>山ごとに独立して切り上げ</strong>になります。
+合計を <code>sum(piles) / k</code> で見積もると<strong>この切り上げの分だけ短く出て、答えを間違えます</strong>。
+</p>
+<pre><code>piles = [3, 6, 7, 11]、h = 8
+
+k = 3  →  1 + 2 + 3 + 4 = 10 時間   ✗（8 を超える）
+k = 4  →  1 + 2 + 2 + 3 =  8 時間   ✓   ← 答えは 4
+k = 11 →  1 + 1 + 1 + 1 =  4 時間   ✓
+k = 100 → 1 + 1 + 1 + 1 =  4 時間   ✓   ← 11 より速くしても縮まない
+
+        k = 4 の内訳：山6 は 4本 → 残り2本 で2時間（余力2本は捨てる）</code></pre>
+<p>
+<strong><code>n</code>（山の数）が、どんなに速くしても縮まない床</strong>です
+（<code>h &lt; n</code> なら絶対に間に合わない）。
+そして <strong><code>k = max(piles)</code> でその床にもう到達している</strong>——
+これが第3節の「<code>hi = max(piles)</code> で足りる」の中身です。
+</p>
+</div>
+
+<p>
+二分探索だと当たりをつけて <code>piles.sort()</code> と書いた瞬間に手が止まります。
+<strong>ソートしても <code>k</code> は出てこない。</strong>答えの <code>k</code> は、そもそも <code>piles</code> の中に無いからです
+（<code>piles = [3, 6, 7, 11]</code>, <code>h = 8</code> の答えは <code>4</code>——配列に無い数）。
+</p>
+
+<table class="ab">
+  <tr><th></th><th>型A・型B（704 / 35）</th><th>型D（875）</th></tr>
+  <tr><td>二分探索している対象</td><td>配列の<strong>添字</strong> <code>0 … n-1</code></td><td>答えの<strong>候補</strong> <code>1 … max(piles)</code></td></tr>
+  <tr><td>単調なもの</td><td>配列の値（ソート済み）</td><td><strong>自分で書いた関数</strong></td></tr>
+  <tr><td>単調性の保証者</td><td>問題文</td><td><strong>あなた</strong>（証明が必要）</td></tr>
+  <tr><td><code>piles</code> の順序</td><td>—</td><td><strong>無関係。ソート不要</strong></td></tr>
+</table>
+
+<p>
+必要なのはソートではなく<strong>単調性</strong>だけ——これは 278. First Bad Version で確認済みです
+（<a href="./0015-the-answer-is-where-it-stops.html">Lesson 15</a>）。
+278 との違いは、<strong>単調な関数が問題文から与えられていない</strong>ことだけ。自分で作ります。
+</p>
+
+<h2>2. 述語を作り、向きを確かめる</h2>
+
+<p>
+答えを二分探索するときの述語は、いつも同じ形をしています——
+<strong>「この候補で間に合うか」を Yes / No で返す関数</strong>。
+</p>
+
+<pre><code>def ok(k):
+    """速さ k で h 時間以内に食べ終わるか"""
+    return sum(hours_for(p, k) for p in piles) &lt;= h</code></pre>
+
+<p>
+そして<strong>⓪の仕事は、この <code>ok</code> が単調であることを言うこと</strong>です。
+</p>
+
+<blockquote>
+<code>k</code> を大きくすると、どの山も必要時間が<strong>増えることはない</strong>（<code>ceil(p/k)</code> は <code>k</code> について非増加）。
+合計時間も増えないので、<strong>一度 <code>h</code> 以内に収まったら、それより速い <code>k</code> でも必ず収まる</strong>。
+よって <code>ok</code> は <code>False … False, True … True</code> の順に並ぶ。
+</blockquote>
+
+<div class="aside">
+<span class="label">「増える一方」ではなく「減らない」で足りる</span>
+<p>
+<code>hours(k)</code> は <code>k</code> が増えても<strong>同じ値のまま</strong>のことがよくあります
+（<code>piles = [3]</code> なら <code>k = 3, 4, 5, …</code> すべて1時間）。
+<strong>単調性に必要なのは「厳密に減ること」ではなく「増えないこと」</strong>——
+真偽が <code>✗ ✗ ✓ ✓ ✓</code> と並び、<strong>一度 ✓ になったら ✗ に戻らない</strong>、これだけです。
+「厳密に減らないから二分探索できない」と誤診しないこと。
+</p>
+</div>
+
+<h2>3. 範囲の両端にも、根拠が要る</h2>
+
+<p>
+配列なら範囲は <code>0 … n-1</code> で悩みません。答えを探すときは<strong>範囲を自分で決める＝そこにも根拠が必要</strong>になります。
+</p>
+
+<ul>
+  <li><strong><code>lo = 1</code></strong>：<code>k = 0</code> は永久に食べ終わらないので<strong>定義域の外</strong>。1が最小の意味ある候補。</li>
+  <li><strong><code>hi = max(piles)</code></strong>：1時間に1つの山しか食べられないので、
+      <strong><code>n</code> 時間が最速</strong>。<code>k</code> を <code>max(piles)</code> より大きくしても合計は <code>n</code> のまま減りません。</li>
+</ul>
+
+<div class="check" data-answer="ok(hi)がTrue" data-alt="ok(max(piles))がtrue|okがtrue|範囲内にtrueがある|答えが範囲内にある|true|ok(hi)=true|ok(hi)==true">
+  <p class="check-q">
+    上限を <code>max(piles)</code> ではなく「大きめに <code>10**9</code>」としても動きます。
+    では <strong><code>hi</code> の選び方に本当に必要な条件</strong>は何か。<code>first_true</code> が前提にしていることです。
+  </p>
+  <input class="check-in" type="text" placeholder="条件を短く">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+    <strong><code>ok(hi)</code> が True であること。</strong><code>first_true</code> は
+    「範囲内に必ず True がある」を前提に <code>lo</code> を返します。
+    True が1つも無ければ、<strong>無いことを検出せず <code>hi</code> をそのまま返す</strong>——
+    エラーにならないので気づけません（<code>while lo &lt; hi</code> が偽になっただけ）。
+    <code>max(piles)</code> を選ぶ理由は「十分大きいから」ではなく<strong><code>ok</code> が True だと証明できるから</strong>。
+    ⓪で前提を名指しし、保証者を書く形（<a href="../learning-records/0015-preconditions-are-invisible.md">LR-0015</a>）が、そのまま範囲の両端に適用されます。
+  </p>
+</div>
+
+<h2>4. コードは <code>first_true</code> そのまま</h2>
+
+<pre><code>def minEatingSpeed(piles, h):
+    def hours(k):
+        return sum(-(-p // k) for p in piles)      # ceil(p / k)
+
+    lo, hi = 1, max(piles)                          # ok(hi) は True（証明済み）
+    while lo &lt; hi:
+        mid = (lo + hi) // 2
+        if hours(mid) &lt;= h:
+            hi = mid                                # mid はまだ答えの候補 → 残す
+        else:
+            lo = mid + 1                            # mid では間に合わないと確定 → 消す
+    return lo</code></pre>
+
+<p>
+<strong>③（消える区間とその根拠）は <code>while</code> の中の2行そのもの</strong>で、
+<a href="./0015-the-answer-is-where-it-stops.html">Lesson 15</a> の型Bと1文字も変わりません。
+新しいのは <code>hours</code> と範囲だけ。<strong>型Dは新しい探索ではなく、新しい述語です。</strong>
+</p>
+
+<div class="check" data-answer="-(-p//k)" data-alt="(p+k-1)//k|-(-p // k)|(p + k - 1) // k|-((-p)//k)|(p+k-1)//k または -(-p//k)">
+  <p class="check-q">
+    <code>ceil(p / k)</code> を<strong>整数演算だけ</strong>で書いてください（<code>math</code> も <code>float</code> も使わない）。
+  </p>
+  <input class="check-in" type="text" placeholder="式を1つ">
+  <button class="check-btn">確認</button>
+  <p class="check-fb">
+    <strong><code>-(-p // k)</code></strong>（または <code>(p + k - 1) // k</code>）。
+    Python の <code>//</code> は<strong>負の側へ切り捨て</strong>るので、符号を反転すれば切り上げになります。
+    <code>math.ceil(p / k)</code> は <code>float</code> を経由するため、値が大きいと丸め誤差で1ずれることがあります
+    （<code>p</code> は <code>10**9</code> まで。面接では「整数のまま扱いました」と一言添えると強い）。
+  </p>
+</div>
+
+<h2>5. ⑥は、<code>log</code> の中身が変わる</h2>
+
+<div class="quiz">
+  <p class="quiz-q">この解法の時間計算量。<code>n = len(piles)</code>、<code>m = max(piles)</code>。</p>
+  <button class="quiz-opt" data-correct>O(n log m)</button>
+  <button class="quiz-opt">O(m log n)</button>
+  <button class="quiz-opt">O(n log n)</button>
+  <button class="quiz-opt">O(m log m)</button>
+  <p class="quiz-fb">
+    <strong><code>O(n log m)</code>。</strong>二分探索しているのは <code>1 … m</code> なので回数は <code>log m</code>。
+    その<strong>毎回</strong> <code>hours(mid)</code> が全山を舐めるので <code>O(n)</code>。掛けて <code>O(n log m)</code>、空間は <code>O(1)</code>。
+    <code>log</code> の中身は<strong>二分探索した対象の大きさ</strong>——配列長ではありません。
+  </p>
+</div>
+
+<blockquote>
+毎回、<strong>残っている <code>k</code> の候補の半分</strong>を捨てる（<code>hi = mid</code> / <code>lo = mid + 1</code>）。
+候補は <code>m</code> 個なので <code>log₂ m</code> 回。1回ごとに <code>hours</code> が <code>O(n)</code>。
+よって <code>O(n log m)</code>、空間は反復なので <code>O(1)</code>。
+</blockquote>
+
+<p>
+言った量を実現している行を名指しする形（<a href="../learning-records/0020-the-rate-must-be-in-the-code.md">LR-0020</a>）は今日も同じです。
+ただし<strong>名指しする行が2種類</strong>になりました——率を作る行（<code>hi = mid</code> / <code>lo = mid + 1</code>）と、
+<strong>1回のコストを作る行（<code>hours</code> の <code>sum</code>）</strong>。
+<code>log</code> の外に何が掛かっているかは、この2つ目を名指しできたときだけ言えます。
+</p>
+
+<div class="aside">
+<span class="label">面接での言い方——<code>m</code> は入力サイズではない</span>
+<p>
+<code>log m</code> の <code>m</code> は<strong>値</strong>であって要素数ではありません。厳密には入力の
+<strong>ビット数</strong>に比例する量なので、「値の範囲に対して <code>log</code>」と言い分けられると理解が伝わります。
+実務上は <code>m ≤ 10**9</code> なら <code>log₂ m ≈ 30</code>——<strong>ほぼ定数</strong>なので、
+「実質 <code>O(30n)</code> です」と添えるところまで言えると強い。
+</p>
+</div>
+
+<h2>今日の課題</h2>
+
+<p><strong>875. Koko Eating Bananas</strong> を、いつもの形式で。提出は一気に、私が返すのは1点ずつです。</p>
+
+<p>実装前（コードを書く前に、自由記述）：</p>
+<ul>
+  <li><strong>⓪</strong> <strong>何が、何について</strong>単調か。それを保証しているのは誰か
+      （問題文か、あなたの証明か）。あわせて <code>lo</code> と <code>hi</code> の根拠</li>
+  <li><strong>★</strong> この関数が最後に <code>return</code> するものは何か（1文で）</li>
+  <li><strong>②</strong> 素朴解と、そのボトルネック（<strong>素朴解に出てくる語をそのまま含める</strong>）</li>
+  <li><strong>③</strong> <code>ok(mid)</code> が <strong>True のとき／False のとき</strong>、消える区間はどれか。
+      <strong>両方書くこと</strong>——片側だけの③は片側だけ正しいコードを生みます（33 の <code>else</code> 枝）。
+      各枝で<strong>根拠が2要素で閉じているか</strong>も自分で確認する</li>
+</ul>
+
+<p>実装後：</p>
+<ul>
+  <li><strong>⑥</strong> 時間と空間。<strong>率を作る行と、1回のコストを作る行を両方名指しする</strong></li>
+  <li><strong>⚠</strong> 今日いちばん<strong>迷った判断をした行</strong>を1つ、理由つきで</li>
+</ul>
+
+<p>
+余力があれば <strong>1011. Capacity To Ship Packages Within D Days</strong>。
+<strong>同じ形で、違うのは範囲の両端だけ</strong>です（<code>lo</code> が <code>1</code> ではありません——なぜか説明できること）。
+これで二分探索は打ち止め、8/03 週の「配列と文字列」に移ります
+（<a href="../reference/study-plan.html">学習計画</a>）。
+</p>
+
+<h2>読むもの</h2>
+
+<p>
+主資料：<a href="https://usaco.guide/silver/binary-search">USACO Guide — Binary Search（Silver）</a> の
+<strong>“Binary Search on Monotonic Functions” と “Finding The Minimum x Such That f(x) = true”</strong> の2節。
+競技プログラミング向けの教材ですが、<strong>述語 <code>f(x)</code> を軸に据えた説明として最も信頼できるもの</strong>です。
+今日の <code>ok(k)</code> がそのまま <code>f(x)</code> に対応します。「最大の <code>x</code>」を探す形も併記されているので、
+<strong>1011 の前に「最小」と「最大」の書き分け</strong>を見ておいてください。
+</p>
+
+<p class="footer">
+分からないところはその場で聞いてください。私はあなたの教師です。<br>
+関連：<a href="./0016-half-of-it-is-always-sorted.html">Lesson 16</a> ·
+<a href="./0015-the-answer-is-where-it-stops.html">Lesson 15</a> ·
+<a href="../reference/binary-search-template.html">Binary Search テンプレート</a> ·
+<a href="../reference/interview-protocol.html">面接プロトコル</a> ·
+<a href="../reference/problem-set.html">選抜問題セット</a> ·
+<a href="../reference/glossary.html">用語集</a>
+</p>
+
+<script src="../assets/input-check.js"></script>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

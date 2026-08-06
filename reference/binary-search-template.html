@@ -166,7 +166,98 @@ cnt = bisect_right(nums, x) - bisect_left(nums, x)   # x の個数</code></pre>
 </p>
 </div>
 
-<h2>5. 計算量（⑥）の言い方</h2>
+<h2>5. 型 C：回転済みソート配列（33 / 153 型）</h2>
+
+<p>
+⓪は「ソート済み」ではない。<strong>どこか1点に切れ目があり、切れ目を含まない側は必ずソート済み</strong>。
+毎周まず<strong>どちらの半分がソート済みかを判定</strong>し、
+ソート済みの側だけが<strong>両端＝下限と上限</strong>を与えてくれるので、そこで target の有無を決める。
+</p>
+
+<pre><code>def search(nums, target):
+    l, r = 0, len(nums) - 1
+    while l &lt;= r:
+        mid = (l + r) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[l] &lt;= nums[mid]:                 # 左半分 [l, mid] がソート済み
+            if nums[l] &lt;= target &lt; nums[mid]:    # 左に「ある」条件
+                r = mid - 1
+            else:
+                l = mid + 1
+        else:                                     # 右半分 [mid, r] がソート済み
+            if nums[mid] &lt; target &lt;= nums[r]:    # 右に「ある」条件
+                l = mid + 1
+            else:
+                r = mid - 1
+    return -1</code></pre>
+
+<h3>③は、枝ごとに書く。「もう一方も同じ」では書けていない</h3>
+
+<p>
+分岐が対称に見えても、③を片側だけ書くと<strong>書いていない側だけが壊れる</strong>
+（<a href="../learning-records/0024-the-other-branch-was-never-written.md">LR-0024</a>）。
+主語の区間も条件の向きも<strong>両方反転する</strong>ので、2欄そろえて書く。
+</p>
+
+<table class="rule">
+  <tr><th></th><th>左枝（<code>nums[l] &lt;= nums[mid]</code>）</th><th>右枝（else）</th></tr>
+  <tr><td>ソート済みなのは</td><td><code>[l, mid]</code></td><td><code>[mid, r]</code></td></tr>
+  <tr><td>成り立っている事実</td><td class="k">nums[l] &lt;= nums[mid]</td><td class="k">nums[mid] &lt;= nums[r]</td></tr>
+  <tr><td>下限を与えるのは</td><td><code>nums[l]</code></td><td><code>nums[mid]</code></td></tr>
+  <tr><td>上限を与えるのは</td><td><code>nums[mid]</code></td><td><code>nums[r]</code></td></tr>
+  <tr><td>「ここにある」条件</td><td class="k">nums[l] &lt;= target &lt; nums[mid]</td><td class="k">nums[mid] &lt; target &lt;= nums[r]</td></tr>
+</table>
+
+<div class="aside">
+<span class="label">提出前チェック：③に書いた事実と、条件式が矛盾していないか</span>
+<p>
+右枝で <code>nums[mid] &gt; target &gt; nums[r]</code> と書くと、<code>nums[mid] &gt; nums[r]</code> を要求することになる。
+しかし右枝に入った時点で <code>nums[mid] &lt;= nums[r]</code> が成り立っている——
+<strong>この条件は恒偽で、右半分を一度も見ない</strong>。テストの不一致は約4割に出る。
+</p>
+<p>
+バグではなく<strong>説明と実装の論理矛盾</strong>なので、③を読み返せば実行前に見つかる。
+③に「両端が下限と上限を与える」と書いてあるなら、
+<strong>下限側の変数と上限側の変数が式の中で入れ替わっていないか</strong>だけ確認する。
+</p>
+</div>
+
+<table class="rule">
+  <tr><th>誤</th><th>正</th><th>症状</th></tr>
+  <tr class="bad"><td class="k">nums[l] &lt; target &lt; nums[mid]</td><td class="k">nums[l] &lt;= target &lt; nums[mid]</td><td>区間の左端にある target を落とす</td></tr>
+  <tr class="bad"><td class="k">nums[mid] &gt; target &gt; nums[r]</td><td class="k">nums[mid] &lt; target &lt;= nums[r]</td><td><strong>恒偽。右半分を一度も見ない</strong></td></tr>
+  <tr class="bad"><td class="k">if nums[l] &lt; nums[mid]</td><td class="k">if nums[l] &lt;= nums[mid]</td><td><code>l == mid</code>（残り2要素）で else に落ち、前提が壊れる</td></tr>
+</table>
+
+<div class="aside">
+<span class="label">a・b は条件式の誤り。c だけは前提の誤り</span>
+<p>
+<code>if</code> の行は候補を消す行ではなく、<strong>③の前提（どちらがソート済みか）を作る行</strong>。
+等号を落とすと、<code>l == mid</code>（＝ <code>nums[l] == nums[mid]</code>、左は1要素なので当然ソート済み）のケースを
+<strong>「右がソート済み」という偽の前提で書かれた枝に送り込む</strong>。
+</p>
+<pre><code>残り区間 [2, 1]、target = 1
+mid = l なので nums[l] == nums[mid] == 2
+  &lt;  なら → else へ。だが右半分 [2, 1] はソート済みではない（ここに切れ目がある）
+            条件式 nums[mid] &lt; target &lt;= nums[r] は 2 &lt; 1 &lt;= 1 で偽 → r = mid - 1
+            → 右端の 1 を捨てて -1 を返す
+  &lt;= なら → 左枝へ。nums[l] &lt;= target &lt; nums[mid] は 2 &lt;= 1 で偽 → l = mid + 1 → 1 に到達</code></pre>
+<p>
+残り1要素でも else に落ちるが、そちらは安全（<code>[mid, r]</code> が1要素なのでソート済みは真、かつ
+<code>nums[mid] == target</code> は先頭で弾いてある）。<strong>壊れるのはちょうど2要素のときだけ</strong>——
+だから乱択テストでは末端でだけ再現し、目でも見つけにくい。
+</p>
+</div>
+
+
+<p>
+<strong>最小値を探す（153）は型Cではなく <code>first_true</code> そのもの。</strong>
+述語は「<code>nums[i] &lt;= nums[-1]</code>」——切れ目より後ろで初めて真になる単調な述語。
+枝が1つなので上の2欄表は要らない。<strong>型Cを使うのは target を探すときだけ。</strong>
+</p>
+
+<h2>6. 計算量（⑥）の言い方</h2>
 
 <blockquote>
 毎回、<strong>残っている範囲の半分</strong>を捨てる。<code>n → n/2 → n/4 → … → 1</code> なので
@@ -212,7 +303,7 @@ cnt = bisect_right(nums, x) - bisect_left(nums, x)   # x の個数</code></pre>
 </p>
 </div>
 
-<h2>6. 頻出バグ一覧</h2>
+<h2>7. 頻出バグ一覧</h2>
 
 <table class="rule">
   <tr><th>症状</th><th>原因</th><th>直し方</th></tr>
